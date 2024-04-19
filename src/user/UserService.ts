@@ -1,0 +1,74 @@
+import { log } from "console";
+import { User } from "./UserModel";
+import { IUserRepository } from "./UserRepository";
+import { createDTO, loginDTO, registrationDTO } from "./UserDTO";
+import bcrypt from 'bcrypt';
+import { userRole } from "./userTypes";
+
+interface IUserService {
+    registration(user: User): Promise<User | null>
+    login(user: User): Promise<User | null>
+    createUser(user: User): Promise<User | null>
+    findUserById(id: string): Promise<User | null> 
+    findUserByEmail(email: string): Promise<User | null>
+    updateUser(user: User): Promise<User | null>
+}
+
+export class UserService implements IUserService {
+    constructor(private userRepository: IUserRepository) {}
+
+    async registration(regDTO: registrationDTO): Promise<User | null> {
+        const checkEmail = await this.userRepository.findByEmail(regDTO.email);
+        if (checkEmail != null){
+            return Promise.resolve(null);
+        }
+        
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(regDTO.password, salt);
+        const userToCreate = new User('', regDTO.name, regDTO.email, hashedPassword, regDTO.phoneNumber, userRole.UserRoleCustomer);
+        return this.userRepository.create(userToCreate);
+    }
+
+    async login(logDTO: loginDTO): Promise<User | null> {
+        const checkEmail = await this.userRepository.findByEmail(logDTO.email);
+        if (checkEmail == null){
+            return Promise.resolve(null);
+        }
+
+        try {
+            const result = await bcrypt.compare(logDTO.password, checkEmail.password);
+            if (!result){
+                return Promise.resolve(null);
+            }
+            return Promise.resolve(checkEmail);
+        } catch (error) {
+            console.error('Ошибка сравнения паролей:', error);
+            return Promise.resolve(null);
+        }
+    }
+
+    async createUser(cDTO: createDTO): Promise<User | null>{
+        const checkEmail = await this.userRepository.findByEmail(cDTO.email);
+        if (checkEmail != null){
+            return Promise.resolve(null);
+        }
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(cDTO.password, salt);
+        const userToCreate = new User('', cDTO.name, cDTO.email, hashedPassword, cDTO.phoneNumber, cDTO.role);
+        return this.userRepository.create(userToCreate);
+    }
+
+    async findUserById(id: string): Promise<User | null> {
+        return this.userRepository.findById(id);
+    }
+
+    async findUserByEmail(email: string): Promise<User | null> {
+        return this.userRepository.findByEmail(email);
+    }
+
+    async updateUser(user: User): Promise<User | null> {
+        return this.userRepository.update(user);
+    }
+}
