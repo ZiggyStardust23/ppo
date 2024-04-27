@@ -18,7 +18,7 @@ export class UserService implements IUserService {
     constructor(private userRepository: IUserRepository) {}
 
     async registration(regDTO: registrationDTO): Promise<User | null> {
-        const checkEmail = await this.userRepository.findByEmail(regDTO.email);
+        const checkEmail = await this.userRepository.getByEmail(regDTO.email);
         if (checkEmail != null){
             return Promise.resolve(null);
         }
@@ -31,7 +31,7 @@ export class UserService implements IUserService {
     }
 
     async login(logDTO: loginDTO): Promise<User | null> {
-        const checkEmail = await this.userRepository.findByEmail(logDTO.email);
+        const checkEmail = await this.userRepository.getByEmail(logDTO.email);
         if (checkEmail == null){
             return Promise.resolve(null);
         }
@@ -49,7 +49,7 @@ export class UserService implements IUserService {
     }
 
     async createUser(cDTO: createDTO): Promise<User | null>{
-        const checkEmail = await this.userRepository.findByEmail(cDTO.email);
+        const checkEmail = await this.userRepository.getByEmail(cDTO.email);
         if (checkEmail != null){
             return Promise.resolve(null);
         }
@@ -61,11 +61,11 @@ export class UserService implements IUserService {
     }
 
     async findUserById(id: string): Promise<User | null> {
-        return this.userRepository.findById(id);
+        return this.userRepository.getById(id);
     }
 
     async findUserByEmail(email: string): Promise<User | null> {
-        return this.userRepository.findByEmail(email);
+        return this.userRepository.getByEmail(email);
     }
 
     async updateUser(user: User): Promise<User | null> {

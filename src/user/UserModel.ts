@@ -1,12 +1,12 @@
 import { userRole } from "./userTypes";
 
 export class User {
-    private _guid = "";
-    get guid(): string{
-        return this._guid;
+    private _id = "";
+    get id(): string{
+        return this._id;
     }
-    set guid(guidToSet: string){
-        this._guid = guidToSet;
+    set id(idToSet: string){
+        this._id = idToSet;
     }
 
     private _email = "";
@@ -49,9 +49,9 @@ export class User {
         this._role = userRoleToSet;
     }
 
-    constructor(guid: string, name: string, email: string, password: string, phoneNumber: string,
+    constructor(id: string, name: string, email: string, password: string, phoneNumber: string,
     role: userRole){
-        this._guid = name;
+        this._id = name;
         this._name = email;
         this._password = password;
         this._phoneNumber = phoneNumber;

@@ -18,7 +18,7 @@ describe('UserService', () => {
         // Arrange
         const createdUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
 
-        when(userRepository.findByEmail('test@example.com')).thenResolve(null);
+        when(userRepository.getByEmail('test@example.com')).thenResolve(null);
         when(userRepository.create(anything())).thenResolve(createdUser);
     
 
@@ -37,7 +37,7 @@ describe('UserService', () => {
         // Arrange
         const createdUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
 
-        when(userRepository.findByEmail('test@example.com')).thenResolve(createdUser);
+        when(userRepository.getByEmail('test@example.com')).thenResolve(createdUser);
     
 
         // Act
@@ -59,7 +59,7 @@ describe('UserService', () => {
 
         const loginUser = new User('1', 'Vanya', 'test@example.com', hashedPassword, '1234567890', userRole.UserRoleCustomer);
 
-        when(userRepository.findByEmail('test@example.com')).thenResolve(loginUser);
+        when(userRepository.getByEmail('test@example.com')).thenResolve(loginUser);
     
 
         const result = await userService.login({email: 'test@example.com', 
@@ -72,7 +72,7 @@ describe('UserService', () => {
 
     it('login: this email not in db', async () => {
 
-        when(userRepository.findByEmail('someemail@example.com')).thenResolve(null);
+        when(userRepository.getByEmail('someemail@example.com')).thenResolve(null);
     
 
         const result = await userService.login({email: 'someemail@example.com', 
@@ -91,7 +91,7 @@ describe('UserService', () => {
 
         const loginUser = new User('1', 'Vanya', 'test@example.com', hashedPassword, '1234567890', userRole.UserRoleCustomer);
 
-        when(userRepository.findByEmail('test@example.com')).thenResolve(loginUser);
+        when(userRepository.getByEmail('test@example.com')).thenResolve(loginUser);
     
 
         const result = await userService.login({email: 'test@example.com', 
@@ -107,7 +107,7 @@ describe('UserService', () => {
         const userToCreate = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
         const createdUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
 
-        when(userRepository.findByEmail('test@example.com')).thenResolve(null);
+        when(userRepository.getByEmail('test@example.com')).thenResolve(null);
         when(userRepository.create(anything())).thenResolve(createdUser);
     
 
@@ -127,7 +127,7 @@ describe('UserService', () => {
         const userToCreate = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
         const createdUser = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
-        when(userRepository.findByEmail('test@example.com')).thenResolve(createdUser);
+        when(userRepository.getByEmail('test@example.com')).thenResolve(createdUser);
     
 
         // Act
@@ -147,7 +147,7 @@ describe('UserService', () => {
         const user = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
         // Mock behavior of userRepository.findById()
-        when(userRepository.findById(userId)).thenResolve(user);
+        when(userRepository.getById(userId)).thenResolve(user);
 
         // Act
         const result = await userService.findUserById(userId);
@@ -162,7 +162,7 @@ describe('UserService', () => {
         const user = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
         // Mock behavior of userRepository.findByEmail()
-        when(userRepository.findByEmail(userEmail)).thenResolve(user);
+        when(userRepository.getByEmail(userEmail)).thenResolve(user);
 
         // Act
         const result = await userService.findUserByEmail(userEmail);
@@ -178,7 +178,7 @@ describe('UserService', () => {
         const updatedUser = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
         // Mock behavior of userRepository.findById()
-        when(userRepository.findById(userId)).thenResolve(userToUpdate);
+        when(userRepository.getById(userId)).thenResolve(userToUpdate);
         // Mock behavior of userRepository.update()
         when(userRepository.update(anything())).thenResolve(updatedUser);
 
@@ -196,7 +196,7 @@ describe('UserService', () => {
         const updatedUser = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleAdmin);
 
         // Mock behavior of userRepository.findById()
-        when(userRepository.findById(userId)).thenResolve(null);
+        when(userRepository.getById(userId)).thenResolve(null);
 
         // Act
         const result = await userService.updateUser(userToUpdate);
