@@ -1,8 +1,3 @@
-type paymentCreateDTO = {
-    orderId: string,
-    sum: number
-}
-
 type paymentUpdateDTO = {
     id: string,
     orderId: string,
@@ -10,4 +5,4 @@ type paymentUpdateDTO = {
     sum: number
 }
 
-export {paymentCreateDTO, paymentUpdateDTO}
+export {paymentUpdateDTO}

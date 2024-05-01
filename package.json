@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --verbose"
+    "testUnit": "jest --testPathPattern=unit",
+    "testIntegration": "jest --verbose --testPathPattern=integration",
+    "scenario1": "tsc scenarios/userBuysScenario.ts && node scenarios/userBuysScenario.js",
+    "scenario2": "tsc scenarios/userAddCommentToPhone.ts && node scenarios/userAddCommentToPhone.js"
   },
   "keywords": [],
   "author": "",
@@ -12,12 +15,16 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/jest": "^29.5.12",
+    "@types/pg": "^8.11.5",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "ts-mockito": "^2.6.1",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1"
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.5",
+    "readline-sync": "^1.4.10"
   }
 }

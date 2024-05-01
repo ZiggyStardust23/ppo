@@ -1,12 +1,12 @@
 import { IPhoneRepository } from "./PhoneRepository";
 import { Phone } from "./PhoneModel";
-import { phoneCreateDTO, phoneFullDTO } from "./PhoneDTO";
+import { phoneCreateDTO, phoneFullDTO, phoneSearchDTO } from "./PhoneDTO";
 
 export interface IPhoneService {
     findById(id: string): Promise<Phone | null>;
-    paginate(props: Partial<phoneFullDTO>, pageNumber: number, pageSize: number): Promise<Phone[]>;
-    create(phone: Phone): Promise<Phone>;
-    update(phone: Phone): Promise<Phone | null>;
+    paginate(props: Partial<phoneSearchDTO>, pageNumber: number, pageSize: number): Promise<Phone[]>;
+    create(phone: phoneCreateDTO): Promise<Phone>;
+    update(phone: phoneFullDTO): Promise<Phone | null>;
 }
 
 export class PhoneService implements IPhoneService {
@@ -16,7 +16,7 @@ export class PhoneService implements IPhoneService {
         return this.phoneRepository.getById(id);
     }
 
-    async paginate(props: Partial<phoneFullDTO>, pageNumber: number, pageSize: number): Promise<Phone[]> {
+    async paginate(props: Partial<phoneSearchDTO>, pageNumber: number, pageSize: number): Promise<Phone[]> {
         return this.phoneRepository.paginate(props, pageNumber, pageSize);
     }
 
@@ -24,11 +24,11 @@ export class PhoneService implements IPhoneService {
         const phoneToCreate = new Phone(
             '',
             phone.name,
-            phone.producerName,
-            phone.osName,
-            phone.ramSize,
-            phone.memSize,
-            phone.camRes,
+            phone.producername,
+            phone.osname,
+            phone.ramsize,
+            phone.memsize,
+            phone.camres,
             phone.price
         )
         return this.phoneRepository.create(phoneToCreate);
@@ -41,13 +41,15 @@ export class PhoneService implements IPhoneService {
         const phoneUpdated = new Phone(
             phone.id,
             phone.name,
-            phone.producerName,
-            phone.osName,
-            phone.ramSize,
-            phone.memSize,
-            phone.camRes,
+            phone.producername,
+            phone.osname,
+            phone.ramsize,
+            phone.memsize,
+            phone.camres,
             phone.price
         )
         return this.phoneRepository.update(phoneUpdated);
     }
 }
+export { Phone };
+

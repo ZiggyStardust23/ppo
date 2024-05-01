@@ -6,12 +6,12 @@ export class Basket {
     public set id(value: string) {
         this._id = value;
     }
-    private _userId: string;
-    public get userId(): string {
-        return this._userId;
+    private _userid: string;
+    public get userid(): string {
+        return this._userid;
     }
-    public set userId(value: string) {
-        this._userId = value;
+    public set userid(value: string) {
+        this._userid = value;
     }
     private _positions: BasketPosition[];
     public get positions(): BasketPosition[] {
@@ -23,11 +23,11 @@ export class Basket {
     
     constructor(
         id: string,
-        userId: string,
+        userid: string,
         positions: BasketPosition[], 
     ){
         this._id = id;
-        this._userId = userId;
+        this._userid = userid;
         this._positions = positions
     }
 }

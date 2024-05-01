@@ -6,12 +6,12 @@ export class Comment {
     public set id(value: string) {
         this._id = value;
     }
-    private _userId: string;
-    public get userId(): string {
-        return this._userId;
+    private _userid: string;
+    public get userid(): string {
+        return this._userid;
     }
-    public set userId(value: string) {
-        this._userId = value;
+    public set userid(value: string) {
+        this._userid = value;
     }
     private _productId: string;
     public get productId(): string {
@@ -37,13 +37,13 @@ export class Comment {
 
     constructor(
         id: string, 
-        userId: string, 
+        userid: string, 
         productId: string,
         text: string,
         rate: number
     ){
         this._id = id;
-        this._userId = userId;
+        this._userid = userid;
         this._productId = productId;
         this._text = text;
         this._rate = rate;

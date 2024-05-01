@@ -26,7 +26,7 @@ describe('UserService', () => {
         const result = await userService.registration({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
-                                                     phoneNumber: '1234567890', 
+                                                     phone_number: '1234567890', 
                                                      });
 
         // Assert
@@ -44,7 +44,7 @@ describe('UserService', () => {
         const result = await userService.registration({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
-                                                     phoneNumber: '1234567890', 
+                                                     phone_number: '1234567890', 
                                                      });
 
         // Assert
@@ -115,7 +115,7 @@ describe('UserService', () => {
         const result = await userService.createUser({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
-                                                     phoneNumber: '1234567890', 
+                                                     phone_number: '1234567890', 
                                                      role: userRole.UserRoleCustomer});
 
         // Assert
@@ -134,7 +134,7 @@ describe('UserService', () => {
         const result = await userService.createUser({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
-                                                     phoneNumber: '1234567890', 
+                                                     phone_number: '1234567890', 
                                                      role: userRole.UserRoleCustomer});
 
         // Assert
@@ -143,14 +143,14 @@ describe('UserService', () => {
 
     it('should find user by id', async () => {
         // Arrange
-        const userId = '1';
-        const user = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
+        const userid = '1';
+        const user = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
         // Mock behavior of userRepository.findById()
-        when(userRepository.getById(userId)).thenResolve(user);
+        when(userRepository.getById(userid)).thenResolve(user);
 
         // Act
-        const result = await userService.findUserById(userId);
+        const result = await userService.findUserById(userid);
 
         // Assert
         expect(result).toEqual(user);
@@ -173,12 +173,12 @@ describe('UserService', () => {
 
     it('should update user', async () => {
         // Arrange
-        const userId = '1';
-        const userToUpdate = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
-        const updatedUser = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
+        const userid = '1';
+        const userToUpdate = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
+        const updatedUser = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
         // Mock behavior of userRepository.findById()
-        when(userRepository.getById(userId)).thenResolve(userToUpdate);
+        when(userRepository.getById(userid)).thenResolve(userToUpdate);
         // Mock behavior of userRepository.update()
         when(userRepository.update(anything())).thenResolve(updatedUser);
 
@@ -191,12 +191,12 @@ describe('UserService', () => {
 
     it('should not update user, because there is no such user in db', async () => {
         // Arrange
-        const userId = '1';
-        const userToUpdate = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
-        const updatedUser = new User(userId, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleAdmin);
+        const userid = '1';
+        const userToUpdate = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
+        const updatedUser = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleAdmin);
 
         // Mock behavior of userRepository.findById()
-        when(userRepository.getById(userId)).thenResolve(null);
+        when(userRepository.getById(userid)).thenResolve(null);
 
         // Act
         const result = await userService.updateUser(userToUpdate);

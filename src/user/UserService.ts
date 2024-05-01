@@ -2,13 +2,13 @@ import { log } from "console";
 import { User } from "./UserModel";
 import { IUserRepository } from "./UserRepository";
 import { createDTO, loginDTO, registrationDTO } from "./UserDTO";
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { userRole } from "./userTypes";
 
 interface IUserService {
-    registration(user: User): Promise<User | null>
-    login(user: User): Promise<User | null>
-    createUser(user: User): Promise<User | null>
+    registration(regDTO: registrationDTO): Promise<User | null>
+    login(logDTO: loginDTO): Promise<User | null>
+    createUser(cDTO: createDTO): Promise<User | null>
     findUserById(id: string): Promise<User | null> 
     findUserByEmail(email: string): Promise<User | null>
     updateUser(user: User): Promise<User | null>
@@ -26,7 +26,7 @@ export class UserService implements IUserService {
         const saltRounds = 10;
         const salt = await bcrypt.genSalt(saltRounds);
         const hashedPassword = await bcrypt.hash(regDTO.password, salt);
-        const userToCreate = new User('', regDTO.name, regDTO.email, hashedPassword, regDTO.phoneNumber, userRole.UserRoleCustomer);
+        const userToCreate = new User('', regDTO.name, regDTO.email, hashedPassword, regDTO.phone_number, userRole.UserRoleCustomer);
         return this.userRepository.create(userToCreate);
     }
 
@@ -56,7 +56,7 @@ export class UserService implements IUserService {
         const saltRounds = 10;
         const salt = await bcrypt.genSalt(saltRounds);
         const hashedPassword = await bcrypt.hash(cDTO.password, salt);
-        const userToCreate = new User('', cDTO.name, cDTO.email, hashedPassword, cDTO.phoneNumber, cDTO.role);
+        const userToCreate = new User('', cDTO.name, cDTO.email, hashedPassword, cDTO.phone_number, cDTO.role);
         return this.userRepository.create(userToCreate);
     }
 

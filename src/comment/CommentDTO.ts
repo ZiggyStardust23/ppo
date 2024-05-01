@@ -1,5 +1,5 @@
 type commentCreateDTO = {
-    userId: string, 
+    userid: string, 
     productId: string, 
     text: string,
 }

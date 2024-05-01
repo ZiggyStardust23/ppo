@@ -17,12 +17,12 @@ export class User {
         this._email = nameToSet;
     }
 
-    private _phoneNumber = "";
-    get phoneNumber(): string{
-        return this._phoneNumber;
+    private _phone_number = "";
+    get phone_number(): string{
+        return this._phone_number;
     }
-    set phoneNumber(phoneNumberToSet: string){
-        this._phoneNumber = phoneNumberToSet;
+    set phone_number(phone_numberToSet: string){
+        this._phone_number = phone_numberToSet;
     }
 
     private _name = "";
@@ -49,12 +49,13 @@ export class User {
         this._role = userRoleToSet;
     }
 
-    constructor(id: string, name: string, email: string, password: string, phoneNumber: string,
+    constructor(id: string, name: string, email: string, password: string, phone_number: string,
     role: userRole){
-        this._id = name;
-        this._name = email;
+        this._id = id;
+        this._name = name;
+        this._email = email;
         this._password = password;
-        this._phoneNumber = phoneNumber;
+        this._phone_number = phone_number;
         this._role = role;
     }
 }

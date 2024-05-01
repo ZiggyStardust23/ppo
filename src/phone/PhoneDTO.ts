@@ -1,22 +1,36 @@
 type phoneFullDTO = {
     id: string,
     name: string,
-    producerName: string,
-    osName: string,
-    ramSize: number,
-    memSize: number,
-    camRes: number,
+    producername: string,
+    osname: string,
+    ramsize: number,
+    memsize: number,
+    camres: number,
     price: number
+}
+
+type phoneSearchDTO = {
+    name: string,
+    producername: string,
+    osname: string,
+    minramsize: number,
+    maxramsize: number,
+    minmemsize: number,
+    maxmemsize: number,
+    mincamres: number,
+    maxcamres: number,
+    minPrice: number,
+    maxPrice: number
 }
 
 type phoneCreateDTO = {
     name: string,
-    producerName: string,
-    osName: string,
-    ramSize: number,
-    memSize: number,
-    camRes: number,
+    producername: string,
+    osname: string,
+    ramsize: number,
+    memsize: number,
+    camres: number,
     price: number
 }
 
-export {phoneFullDTO, phoneCreateDTO}
+export {phoneFullDTO, phoneCreateDTO, phoneSearchDTO}

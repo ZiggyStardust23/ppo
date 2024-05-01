@@ -15,7 +15,7 @@ export class CommentService implements ICommentService {
     public async create(comment: commentCreateDTO): Promise<Comment> {
         const commentToCreate = new Comment(
             "",
-            comment.userId,
+            comment.userid,
             comment.productId,
             comment.text,
             0

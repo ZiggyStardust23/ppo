@@ -3,8 +3,8 @@ import { Basket, BasketPosition } from './BasketModel';
 import { updateBasketDTO } from './BasketDTO';
 
 interface IBasketService {
-    findByUserId(userId: string): Promise<Basket | null>;
-    create(userId: string): Promise<Basket>;
+    findByuserid(userid: string): Promise<Basket | null>;
+    create(userid: string): Promise<Basket>;
     clear(basketId: string): Promise<boolean>;
     calculateTotalPrice(basketId: string): Promise<number | null>;
     addProductsToBasket(basket: updateBasketDTO): Promise<Basket | null>;
@@ -14,12 +14,12 @@ interface IBasketService {
 export class BasketService implements IBasketService {
     constructor(private basketRepository: IBasketRepository) {}
 
-    public async create(userId: string): Promise<Basket> {
-        return this.basketRepository.create(userId);
+    public async create(userid: string): Promise<Basket> {
+        return this.basketRepository.create(userid);
     }
 
-    public async findByUserId(userId: string): Promise<Basket | null> {
-        return this.basketRepository.getByUserId(userId);
+    public async findByuserid(userid: string): Promise<Basket | null> {
+        return this.basketRepository.getByuserid(userid);
     }
 
     public async clear(basketId: string): Promise<boolean> {
@@ -42,7 +42,7 @@ export class BasketService implements IBasketService {
         //Чтобы одинаковые позиции не попадали в basket
         let filteredPositions = basket.positions.filter(function(pos) {
             for (let dbPos of checkBasket.positions){
-                if (dbPos.id === pos.id){
+                if (dbPos.phoneId === pos.phoneId && dbPos.productsAmount === pos.productsAmount){
                     return false;
                 }
             }
@@ -62,7 +62,7 @@ export class BasketService implements IBasketService {
         }
         checkBasket.positions = checkBasket.positions.filter(function(pos) {
             for (let delPos of basket.positions){
-                if (delPos.id === pos.id){
+                if (delPos.phoneId === pos.phoneId && delPos.productsAmount === pos.productsAmount){
                     return false;
                 }
             }
@@ -72,3 +72,5 @@ export class BasketService implements IBasketService {
         return await this.basketRepository.update(checkBasket);
     }
 }
+
+export { BasketPosition, Basket };

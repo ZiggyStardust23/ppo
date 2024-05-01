@@ -1,9 +1,9 @@
-import { paymentCreateDTO, paymentUpdateDTO } from "./PaymentDTO";
+import { paymentUpdateDTO } from "./PaymentDTO";
 import { Payment } from "./PaymentModel";
 import { IPaymentRepository } from "./PaymentRepository";
 
 export interface IPaymentService {
-    create(payment: paymentCreateDTO): Promise<Payment>;
+    create(orderid: string): Promise<Payment>;
     update(payment: paymentUpdateDTO): Promise<Payment | null>;
     findById(paymentId: string): Promise<Payment | null>;
     findByOrderId(orderId: string): Promise<Payment | null>;
@@ -12,8 +12,8 @@ export interface IPaymentService {
 export class PaymentService implements IPaymentService {
     constructor(private paymentRepository: IPaymentRepository) {}
 
-    public async create(payment: paymentCreateDTO): Promise<Payment> {
-        const paymentCreated = new Payment("", payment.orderId, true, payment.sum);
+    public async create(orderid: string): Promise<Payment> {
+        const paymentCreated = new Payment("", orderid, true, 0);
         return this.paymentRepository.create(paymentCreated);
     }
     

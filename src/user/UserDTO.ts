@@ -3,7 +3,7 @@ import { userRole } from "./userTypes"
 type registrationDTO = {
     email: string,
     name: string,
-    phoneNumber: string,
+    phone_number: string,
     password: string
 }
 
@@ -14,7 +14,7 @@ type loginDTO = {
 
 type createDTO = {
     email: string,
-    phoneNumber: string,
+    phone_number: string,
     name: string,
     password: string,
     role: userRole,

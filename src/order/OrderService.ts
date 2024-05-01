@@ -5,7 +5,7 @@ import { orderCreateDTO, orderUpdatePositions, orderUpdateStatus } from './Order
 export interface IOrderService {
     create(order: orderCreateDTO): Promise<Order>;
     findById(orderId: string): Promise<Order | null>;
-    findByUserId(userId: string): Promise<Order[]>;
+    findByuserid(userid: string): Promise<Order[]>;
     updateOrderStatus(order: orderUpdateStatus): Promise<Order | null>;
     addPositionsToOrder(order: orderUpdatePositions): Promise<Order | null>;
     removePositionsFromOrder(order: orderUpdatePositions): Promise<Order | null>;
@@ -18,7 +18,7 @@ export class OrderService implements IOrderService {
 
         const orderToCreate = new Order(
             "",
-            order.userId,
+            order.userid,
             OrderStatus.PLACED,
             order.address,
             new Date(),
@@ -32,8 +32,8 @@ export class OrderService implements IOrderService {
         return await this.orderRepository.getById(orderId);
     }
 
-    async findByUserId(userId: string): Promise<Order[]> {
-        return await this.orderRepository.getByUserId(userId);
+    async findByuserid(userid: string): Promise<Order[]> {
+        return await this.orderRepository.getByuserid(userid);
     }
 
     async updateOrderStatus(order: orderUpdateStatus): Promise<Order | null> {
@@ -53,7 +53,7 @@ export class OrderService implements IOrderService {
         //Чтобы одинаковые позиции не попадали в order
         let filteredPositions = order.positions.filter(function(pos) {
             for (let dbPos of checkOrder.positions){
-                if (dbPos.id === pos.id){
+                if (dbPos.productId === pos.productId && dbPos.productsAmount === pos.productsAmount){
                     return false;
                 }
             }
@@ -63,6 +63,7 @@ export class OrderService implements IOrderService {
             checkOrder.positions.push(pos);
         }
         
+        console.log(checkOrder)
         return await this.orderRepository.update(checkOrder);
     }
 
@@ -73,7 +74,7 @@ export class OrderService implements IOrderService {
         }
         checkOrder.positions = checkOrder.positions.filter(function(pos) {
             for (let delPos of order.positions){
-                if (delPos.id === pos.id){
+                if (delPos.productId === pos.productId && delPos.productsAmount === pos.productsAmount){
                     return false;
                 }
             }
@@ -83,3 +84,5 @@ export class OrderService implements IOrderService {
         return await this.orderRepository.update(checkOrder);
     }
 }
+
+export { Position, Order, OrderStatus };

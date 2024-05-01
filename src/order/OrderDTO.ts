@@ -1,7 +1,7 @@
 import { OrderStatus, Position } from "./OrderModel"
 
 type orderCreateDTO = {
-    userId: string,
+    userid: string,
     address: string,
     positions: Position[],
 }
