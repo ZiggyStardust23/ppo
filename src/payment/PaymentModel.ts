@@ -1,3 +1,5 @@
+import { returnPaymentDTO } from "./PaymentDTO";
+
 export class Payment {
     private _id: string;
     private _orderId: string;
@@ -34,5 +36,14 @@ export class Payment {
     }
     set sum(sum: number) {
         this._sum = sum;
+    }
+
+    public toDTO(): returnPaymentDTO{
+        return {
+            id: this.id,
+            orderId: this.orderId,
+            status: this.status,
+            sum: this.sum
+        }
     }
 }

@@ -1,9 +1,9 @@
-import { OrderStatus, Position } from "./OrderModel"
+import {OrderPosition } from "./OrderModel"
 
 type orderCreateDTO = {
     userid: string,
     address: string,
-    positions: Position[],
+    positions: orderPositionDTO[],
 }
 
 type orderUpdateStatus = {
@@ -13,7 +13,41 @@ type orderUpdateStatus = {
 
 type orderUpdatePositions = {
     id: string,
-    positions: Position[]
+    positions: orderPositionDTO[]
 }
 
-export {orderCreateDTO, orderUpdatePositions, orderUpdateStatus}
+type orderPositionDTO = {
+    id: string;
+    orderId: string;
+    productId: string;
+    productsAmount: number;
+}
+
+type returnOrderPositionDTO = {
+    id: string;
+    orderId: string;
+    productId: string;
+    productsAmount: number;    
+}
+
+enum OrderStatus {
+    PLACED,
+    PROCESSING,
+    COMPLETED,
+    CANCELLED
+}
+
+type orderServiceError = {
+    errormsg: string;
+}
+
+type returnOrderDTO = {
+    id: string,
+    userid: string,
+    status: OrderStatus,
+    address: string,
+    date: Date,
+    positions: returnOrderPositionDTO[],
+}
+
+export {orderCreateDTO, orderUpdatePositions, orderUpdateStatus, orderPositionDTO, returnOrderDTO, returnOrderPositionDTO, OrderStatus, orderServiceError}

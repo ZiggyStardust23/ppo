@@ -2,7 +2,8 @@ import { UserService } from '../src/user/UserService'
 import { IUserRepository } from '../src/user/UserRepository';
 import { User } from '../src/user/UserModel';
 import { mock, instance, when, anything } from 'ts-mockito';
-import { userRole } from '../src/user/userTypes';
+import { userRole } from '../src/user/UserDTO';
+import { hashPswd } from '../src/user/UserService';
 import bcrypt from 'bcrypt';
 
 describe('UserService', () => {
@@ -15,49 +16,38 @@ describe('UserService', () => {
     });
 
     it('should create user by registration', async () => {
-        // Arrange
         const createdUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
 
         when(userRepository.getByEmail('test@example.com')).thenResolve(null);
         when(userRepository.create(anything())).thenResolve(createdUser);
     
-
-        // Act
         const result = await userService.registration({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
                                                      phone_number: '1234567890', 
                                                      });
 
-        // Assert
-        expect(result).toEqual(createdUser);
+        expect(result).toEqual({id: '1', name: 'Vanya', email: 'test@example.com', phone_number: '1234567890', role: userRole.UserRoleCustomer});
     });
 
     it('should not create user by registration, this email already in db', async () => {
-        // Arrange
-        const createdUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
+        const existingUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
 
-        when(userRepository.getByEmail('test@example.com')).thenResolve(createdUser);
+        when(userRepository.getByEmail('test@example.com')).thenResolve(null);
     
 
-        // Act
         const result = await userService.registration({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
                                                      phone_number: '1234567890', 
                                                      });
 
-        // Assert
-        expect(result).toEqual(null);
+        expect(result).toEqual({"errormsg": "This email is already in db"})
     });
 
     it('login: success', async () => {
-        
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash('password', salt);
-
-        const loginUser = new User('1', 'Vanya', 'test@example.com', hashedPassword, '1234567890', userRole.UserRoleCustomer);
+        const hashed = await hashPswd("password");
+        const loginUser = new User('1', 'Vanya', 'test@example.com', hashed, '1234567890', userRole.UserRoleCustomer);
 
         when(userRepository.getByEmail('test@example.com')).thenResolve(loginUser);
     
@@ -66,8 +56,7 @@ describe('UserService', () => {
                                                      password: 'password', 
                                                      });
 
-        // Assert
-        expect(result).toEqual(loginUser);
+        expect(result).toEqual({id: '1', name: 'Vanya', email: 'test@example.com', phone_number: '1234567890', role: userRole.UserRoleCustomer});
     });
 
     it('login: this email not in db', async () => {
@@ -79,129 +68,121 @@ describe('UserService', () => {
                                                      password: 'password', 
                                                      });
 
-        // Assert
-        expect(result).toEqual(null);
+        expect(result).toEqual({errormsg: "wrong email"});
     });
 
     it('login: bad password', async () => {
         
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash('password', salt);
-
-        const loginUser = new User('1', 'Vanya', 'test@example.com', hashedPassword, '1234567890', userRole.UserRoleCustomer);
+        const hashed = await hashPswd("password");
+        const loginUser = new User('1', 'Vanya', 'test@example.com', hashed, '1234567890', userRole.UserRoleCustomer);
 
         when(userRepository.getByEmail('test@example.com')).thenResolve(loginUser);
     
 
         const result = await userService.login({email: 'test@example.com', 
-                                                     password: 'badpassword', 
+                                                password: 'badpassword', 
                                                      });
 
-        // Assert
-        expect(result).toEqual(null);
+        expect(result).toEqual({errormsg: "wrong password"});
     });
 
     it('should create user', async () => {
-        // Arrange
-        const userToCreate = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
         const createdUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
 
         when(userRepository.getByEmail('test@example.com')).thenResolve(null);
         when(userRepository.create(anything())).thenResolve(createdUser);
     
-
-        // Act
         const result = await userService.createUser({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
                                                      phone_number: '1234567890', 
                                                      role: userRole.UserRoleCustomer});
 
-        // Assert
-        expect(result).toEqual(createdUser);
+        expect(result).toEqual({id: '1',
+                                name: 'Vanya', 
+                                email: 'test@example.com', 
+                                phone_number: '1234567890', 
+                                role: userRole.UserRoleCustomer});
     });
 
     it('should not create user, this email already in db', async () => {
-        // Arrange
-        const userToCreate = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
         const createdUser = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
         when(userRepository.getByEmail('test@example.com')).thenResolve(createdUser);
     
-
-        // Act
         const result = await userService.createUser({name: 'Vanya', 
                                                      email: 'test@example.com', 
                                                      password: 'password', 
                                                      phone_number: '1234567890', 
                                                      role: userRole.UserRoleCustomer});
-
-        // Assert
-        expect(result).toEqual(null);
+        expect(result).toEqual({errormsg: "this email is already in db"});
     });
 
     it('should find user by id', async () => {
-        // Arrange
         const userid = '1';
         const user = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
-        // Mock behavior of userRepository.findById()
         when(userRepository.getById(userid)).thenResolve(user);
 
-        // Act
         const result = await userService.findUserById(userid);
 
-        // Assert
-        expect(result).toEqual(user);
+        expect(result).toEqual({id: '1',
+                                name: 'Vanya', 
+                                email: 'test@example.com', 
+                                phone_number: '1234567890', 
+                                role: userRole.UserRoleCustomer});
     });
 
     it('should find user by email', async () => {
-        // Arrange
         const userEmail = 'test@example.com';
         const user = new User('1', 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
-        // Mock behavior of userRepository.findByEmail()
         when(userRepository.getByEmail(userEmail)).thenResolve(user);
 
-        // Act
         const result = await userService.findUserByEmail(userEmail);
 
-        // Assert
-        expect(result).toEqual(user);
+        expect(result).toEqual({id: '1',
+                                name: 'Vanya', 
+                                email: 'test@example.com', 
+                                phone_number: '1234567890', 
+                                role: userRole.UserRoleCustomer});
     });
 
     it('should update user', async () => {
-        // Arrange
         const userid = '1';
         const userToUpdate = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
-        const updatedUser = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
+        const updatedUser = new User(userid, 'Ivan', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
 
-        // Mock behavior of userRepository.findById()
         when(userRepository.getById(userid)).thenResolve(userToUpdate);
-        // Mock behavior of userRepository.update()
         when(userRepository.update(anything())).thenResolve(updatedUser);
 
-        // Act
-        const result = await userService.updateUser(userToUpdate);
+        const result = await userService.updateUser({id: '1',
+                                                    name: 'Vanya', 
+                                                    email: 'test@example.com', 
+                                                    password: 'password', 
+                                                    phone_number: '1234567890', 
+                                                    role: userRole.UserRoleCustomer});
 
-        // Assert
-        expect(result).toEqual(updatedUser);
+        expect(result).toEqual({id: '1',
+                                name: 'Ivan', 
+                                email: 'test@example.com', 
+                                phone_number: '1234567890', 
+                                role: userRole.UserRoleCustomer});
     });
 
     it('should not update user, because there is no such user in db', async () => {
-        // Arrange
         const userid = '1';
         const userToUpdate = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleCustomer);
-        const updatedUser = new User(userid, 'Vanya', 'test@example.com', 'password', '1234567890', userRole.UserRoleAdmin);
 
-        // Mock behavior of userRepository.findById()
-        when(userRepository.getById(userid)).thenResolve(null);
+        when(userRepository.update(anything())).thenResolve(null);
 
-        // Act
-        const result = await userService.updateUser(userToUpdate);
+        const result = await userService.updateUser({id: '1',
+                                                    name: 'Vanya', 
+                                                    email: 'test@example.com', 
+                                                    password: 'password', 
+                                                    phone_number: '1234567890', 
+                                                    role: userRole.UserRoleCustomer});
 
-        // Assert
-        expect(result).toEqual(null);
+        expect(result).toEqual({errormsg: "user to update not found by id"});
     });
 });

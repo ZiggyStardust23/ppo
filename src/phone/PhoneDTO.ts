@@ -33,4 +33,17 @@ type phoneCreateDTO = {
     price: number
 }
 
-export {phoneFullDTO, phoneCreateDTO, phoneSearchDTO}
+type returnPhoneDTO = {
+    id: string,
+    name: string,
+    producername: string,
+    osname: string,
+    ramsize: number,
+    memsize: number,
+    camres: number,
+    price: number
+}
+
+type phoneServiceError = {errormsg: string};
+
+export { phoneFullDTO, phoneCreateDTO, phoneSearchDTO, returnPhoneDTO, phoneServiceError }

@@ -1,4 +1,4 @@
-import { userRole } from "./userTypes";
+import { returnUserDTO, userRole } from "./UserDTO";
 
 export class User {
     private _id = "";
@@ -57,5 +57,15 @@ export class User {
         this._password = password;
         this._phone_number = phone_number;
         this._role = role;
+    }
+
+    public toDTO(): returnUserDTO{
+        return {
+            id: this.id,
+            email: this.email,
+            phone_number: this.phone_number,
+            name: this.name,
+            role: this.role,
+        }
     }
 }

@@ -2,6 +2,7 @@ import { IPhoneRepository } from '../src/phone/PhoneRepository';
 import { PhoneService } from '../src/phone/PhoneService';
 import { Phone } from '../src/phone/PhoneModel';
 import { mock, instance, when, anything } from 'ts-mockito';
+import { returnPhoneDTO } from '../src/phone/PhoneDTO';
 
 describe('OrderService', () => {
     let phoneService: PhoneService;
@@ -34,19 +35,24 @@ describe('OrderService', () => {
 
         when(phoneRepository.create(anything())).thenResolve(createdPhone);
     
-
-        // Act
         const result = await phoneService.create({            
-            name: name_,
-            producername: producername_,
-            osname: osname_,
-            ramsize: ramsize_,
-            memsize: memsize_,
-            camres: camres_,
-            price: price_});
+                                                name: name_,
+                                                producername: producername_,
+                                                osname: osname_,
+                                                ramsize: ramsize_,
+                                                memsize: memsize_,
+                                                camres: camres_,
+                                                price: price_});
 
-        // Assert
-        expect(result).toEqual(createdPhone);
+        expect(result).toEqual({           
+                                id: id_, 
+                                name: name_,
+                                producername: producername_,
+                                osname: osname_,
+                                ramsize: ramsize_,
+                                memsize: memsize_,
+                                camres: camres_,
+                                price: price_});
     });
 
     it('findById: success', async () => {
@@ -72,11 +78,17 @@ describe('OrderService', () => {
         when(phoneRepository.getById("test")).thenResolve(phoneToFind);
     
 
-        // Act
         const result = await phoneService.findById("test");
 
-        // Assert
-        expect(result).toEqual(phoneToFind);
+        expect(result).toEqual({
+                                id: id_,            
+                                name: name_,
+                                producername: producername_,
+                                osname: osname_,
+                                ramsize: ramsize_,
+                                memsize: memsize_,
+                                camres: camres_,
+                                price: price_});
     });
 
     it('findById: fail', async () => {
@@ -84,11 +96,9 @@ describe('OrderService', () => {
         when(phoneRepository.getById("test")).thenResolve(null);
     
 
-        // Act
         const result = await phoneService.findById("test");
 
-        // Assert
-        expect(result).toEqual(null);
+        expect(result).toEqual({errormsg: "not found by id"});
     });
 
     it('paginate: find first by os name', async () => {
@@ -100,22 +110,12 @@ describe('OrderService', () => {
         const memsize_ = 128;
         const camres_ = 20;
         const price_ = 20000;
-        const phone = new Phone(
-            id_,
-            name_,
-            producername_,
-            osname_,
-            ramsize_,
-            memsize_,
-            camres_,
-            price_
-        )
-        const phones = [
-            phone.clone(),
-            phone.clone(),
-            phone.clone(),
-            phone.clone(),
-            phone.clone(), 
+        const phones: Phone[] = [
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_)
         ]
         phones[0].id = 'test1';
         phones[1].id = 'test2';
@@ -127,12 +127,19 @@ describe('OrderService', () => {
             phones[2]
         ]);
     
+        const result  = await phoneService.paginate({osname: "specialOs"}, 1, 1);
 
-        // Act
-        const result = await phoneService.paginate({osname: "specialOs"}, 1, 1);
-
-        // Assert
-        expect(result[0]).toEqual(phones[2]);
+        if (!("errormsg" in result)){
+            expect(result[0]).toEqual({
+                                        id: phones[2].id,            
+                                        name: name_,
+                                        producername: producername_,
+                                        osname: phones[2].osname,
+                                        ramsize: ramsize_,
+                                        memsize: memsize_,
+                                        camres: camres_,
+                                        price: price_});
+        }
     });
     it('paginate: find all by osname, on one page', async () => {
         const id_ = "test";
@@ -143,22 +150,12 @@ describe('OrderService', () => {
         const memsize_ = 128;
         const camres_ = 20;
         const price_ = 20000;
-        const phone = new Phone(
-            id_,
-            name_,
-            producername_,
-            osname_,
-            ramsize_,
-            memsize_,
-            camres_,
-            price_
-        )
-        const phones = [
-            phone.clone(),
-            phone.clone(),
-            phone.clone(),
-            phone.clone(),
-            phone.clone(), 
+        const phones: Phone[] = [
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_)
         ]
         phones[0].id = 'test1';
         phones[1].id = 'test2';
@@ -170,12 +167,26 @@ describe('OrderService', () => {
             phones[2], phones[4]
         ]);
     
-
-        // Act
         const result = await phoneService.paginate({osname: "specialOs"}, 1, 2);
 
-        // Assert
-        expect(result).toEqual([phones[2], phones[4]]);
+        expect(result).toEqual([{
+                                id: phones[2].id,            
+                                name: name_,
+                                producername: producername_,
+                                osname: phones[2].osname,
+                                ramsize: ramsize_,
+                                memsize: memsize_,
+                                camres: camres_,
+                                price: price_},
+                                {
+                                id: phones[4].id,            
+                                name: name_,
+                                producername: producername_,
+                                osname: phones[4].osname,
+                                ramsize: ramsize_,
+                                memsize: memsize_,
+                                camres: camres_,
+                                price: price_}]);
     });
     it('paginate: not found', async () => {
         const id_ = "test";
@@ -186,22 +197,12 @@ describe('OrderService', () => {
         const memsize_ = 128;
         const camres_ = 20;
         const price_ = 20000;
-        const phone = new Phone(
-            id_,
-            name_,
-            producername_,
-            osname_,
-            ramsize_,
-            memsize_,
-            camres_,
-            price_
-        )
-        const phones = [
-            phone.clone(),
-            phone.clone(),
-            phone.clone(),
-            phone.clone(),
-            phone.clone(), 
+        const phones: Phone[] = [
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_),
+            new Phone(id_, name_, producername_, osname_, ramsize_, memsize_, camres_, price_)
         ]
         phones[0].id = 'test1';
         phones[1].id = 'test2';
@@ -212,11 +213,9 @@ describe('OrderService', () => {
         when(phoneRepository.paginate(anything(), 1, 2)).thenResolve([]);
     
 
-        // Act
         const result = await phoneService.paginate({osname: "specialOs"}, 1, 2);
 
-        // Assert
-        expect(result).toEqual([]);
+        expect(result).toEqual({errormsg: "not found by this props"});
     });
 
     it('should succesfully update the price of phone', async () => {
@@ -251,8 +250,6 @@ describe('OrderService', () => {
         when(phoneRepository.getById("1")).thenResolve(givenPhone);
         when(phoneRepository.update(anything())).thenResolve(updatedPhone);
     
-
-        // Act
         const result = await phoneService.update({     
             id: id_,       
             name: name_,
@@ -263,25 +260,28 @@ describe('OrderService', () => {
             camres: camres_,
             price: 25000});
 
-        // Assert
-        expect(result).toEqual(updatedPhone);
+        expect(result).toEqual({
+                                id: id_,            
+                                name: name_,
+                                producername: producername_,
+                                osname: osname_,
+                                ramsize: ramsize_,
+                                memsize: memsize_,
+                                camres: camres_,
+                                price: 25000});
     });
 
     it('update fail: phone not found', async () => {
-        const id_ = "1";
         const name_ = "testname";
         const producername_ = "producer1";
         const osname_ = "os1";
         const ramsize_ = 16;
         const memsize_ = 128;
         const camres_ = 20;
-        const price_ = 20000;
 
         when(phoneRepository.getById("2")).thenResolve(null);
         when(phoneRepository.update(anything())).thenResolve(null);
     
-
-        // Act
         const result = await phoneService.update({     
             id: "2",       
             name: name_,
@@ -292,7 +292,6 @@ describe('OrderService', () => {
             camres: camres_,
             price: 25000});
 
-        // Assert
-        expect(result).toEqual(null);
+        expect(result).toEqual({errormsg: "not found in db"});
     });
 });

@@ -1,26 +1,38 @@
 import { IPhoneRepository } from "./PhoneRepository";
 import { Phone } from "./PhoneModel";
-import { phoneCreateDTO, phoneFullDTO, phoneSearchDTO } from "./PhoneDTO";
+import { phoneCreateDTO, phoneFullDTO, phoneSearchDTO, phoneServiceError, returnPhoneDTO } from "./PhoneDTO";
 
 export interface IPhoneService {
-    findById(id: string): Promise<Phone | null>;
-    paginate(props: Partial<phoneSearchDTO>, pageNumber: number, pageSize: number): Promise<Phone[]>;
-    create(phone: phoneCreateDTO): Promise<Phone>;
-    update(phone: phoneFullDTO): Promise<Phone | null>;
+    findById(id: string): Promise<returnPhoneDTO | phoneServiceError>;
+    paginate(props: Partial<phoneSearchDTO>, pageNumber: number, pageSize: number): Promise<returnPhoneDTO[] | phoneServiceError>;
+    create(phone: phoneCreateDTO): Promise<returnPhoneDTO>;
+    update(phone: phoneFullDTO): Promise<returnPhoneDTO | phoneServiceError>;
 }
 
 export class PhoneService implements IPhoneService {
     constructor(private phoneRepository: IPhoneRepository) {}
 
-    async findById(id: string): Promise<Phone | null> {
-        return this.phoneRepository.getById(id);
+    async findById(id: string): Promise<returnPhoneDTO | phoneServiceError> {
+        const phone = await this.phoneRepository.getById(id);
+        if (phone == null){
+            return Promise.resolve({errormsg: "not found by id"});
+        }
+        return Promise.resolve(phone.toDTO());
     }
 
-    async paginate(props: Partial<phoneSearchDTO>, pageNumber: number, pageSize: number): Promise<Phone[]> {
-        return this.phoneRepository.paginate(props, pageNumber, pageSize);
+    async paginate(props: Partial<phoneSearchDTO>, pageNumber: number, pageSize: number): Promise<returnPhoneDTO[] | phoneServiceError> {
+        const phones =  await this.phoneRepository.paginate(props, pageNumber, pageSize);
+        if (phones.length == 0){
+            return Promise.resolve({errormsg: "not found by this props"});
+        }
+        const phonesToReturn: returnPhoneDTO[] = [];
+        for (let i = 0; i < phones.length; i++){
+            phonesToReturn.push(phones[i].toDTO());
+        }
+        return Promise.resolve(phonesToReturn);
     }
 
-    async create(phone: phoneCreateDTO): Promise<Phone> {
+    async create(phone: phoneCreateDTO): Promise<returnPhoneDTO> {
         const phoneToCreate = new Phone(
             '',
             phone.name,
@@ -31,14 +43,12 @@ export class PhoneService implements IPhoneService {
             phone.camres,
             phone.price
         )
-        return this.phoneRepository.create(phoneToCreate);
+        const phoneCreated = await this.phoneRepository.create(phoneToCreate);
+        return Promise.resolve(phoneCreated.toDTO());
     }
 
-    async update(phone: phoneFullDTO): Promise<Phone | null> {
-        const checkId = await this.phoneRepository.getById(phone.id);
-        if (checkId == null)
-            return Promise.resolve(null);
-        const phoneUpdated = new Phone(
+    async update(phone: phoneFullDTO): Promise<returnPhoneDTO | phoneServiceError> {
+        const phoneToUpdate = new Phone(
             phone.id,
             phone.name,
             phone.producername,
@@ -48,7 +58,11 @@ export class PhoneService implements IPhoneService {
             phone.camres,
             phone.price
         )
-        return this.phoneRepository.update(phoneUpdated);
+        const phoneUpdated = await this.phoneRepository.update(phoneToUpdate);
+        if (phoneUpdated == null){
+            return Promise.resolve({errormsg: "not found in db"});
+        }
+        return Promise.resolve(phoneUpdated.toDTO());
     }
 }
 export { Phone };

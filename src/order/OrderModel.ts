@@ -1,3 +1,5 @@
+import { OrderStatus, returnOrderDTO, returnOrderPositionDTO } from "./OrderDTO";
+
 export class Order {
     private _id: string;
     public get id(): string {
@@ -34,11 +36,11 @@ export class Order {
     public set date(value: Date) {
         this._date = value;
     }
-    private _positions: Position[];
-    public get positions(): Position[] {
+    private _positions: OrderPosition[];
+    public get positions(): OrderPosition[] {
         return this._positions;
     }
-    public set positions(value: Position[]) {
+    public set positions(value: OrderPosition[]) {
         this._positions = value;
     }
     constructor (
@@ -47,7 +49,7 @@ export class Order {
         status: OrderStatus,
         adress: string,
         date: Date,
-        positions: Position[]
+        positions: OrderPosition[]
     ){
         this._id = id;
         this._userid = userid;
@@ -56,17 +58,24 @@ export class Order {
         this._date = date;
         this._positions = positions;
     }
-    
+
+    public toDTO(): returnOrderDTO{
+        const orderPositionsDTO: returnOrderPositionDTO[] = [];
+        for (let i = 0; i < this.positions.length; i++){
+            orderPositionsDTO.push(this.positions[i].toDTO());
+        }
+        return {
+            id: this.id,
+            userid: this.userid,
+            status: this.status,
+            address: this.address,
+            date: this.date,
+            positions: orderPositionsDTO,
+        }
+    }
 }
 
-export enum OrderStatus {
-    PLACED,
-    PROCESSING,
-    COMPLETED,
-    CANCELLED
-}
-
-export class Position {
+export class OrderPosition {
     private _id: string;
     public get id(): string {
         return this._id;
@@ -102,5 +111,16 @@ export class Position {
         this._productId = productId;
         this._productsAmount = productsAmount;
 	}
+
+    public toDTO(): returnOrderPositionDTO{
+        return {
+            id: this.id,
+            orderId: this.orderId,
+            productId: this.productId,
+            productsAmount: this.productsAmount,    
+        }
+    }
     
 }
+export { OrderStatus };
+

@@ -1,3 +1,5 @@
+import { returnPhoneDTO } from "./PhoneDTO";
+
 export class Phone {
     private _id: string;
     private _name: string;
@@ -95,5 +97,18 @@ export class Phone {
     }
     set price(price: number) {
         this._price = price;
+    }
+
+    public toDTO(): returnPhoneDTO{
+        return {
+            id: this.id,
+            name: this.name,
+            producername: this.producername,
+            osname: this.osname,
+            ramsize: this.ramsize,
+            memsize: this.memsize,
+            camres: this.camres,
+            price: this.price
+        }
     }
 }

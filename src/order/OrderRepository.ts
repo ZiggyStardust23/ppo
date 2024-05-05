@@ -1,4 +1,4 @@
-import { Order, Position } from './OrderModel';
+import { Order, OrderPosition } from './OrderModel';
 import { OrderStatus } from './OrderModel';
 import { Pool } from 'pg';
 
@@ -7,7 +7,7 @@ import * as conf from '../../config'
 export interface IOrderRepository {
     create(order: Order): Promise<Order>;
     getById(orderId: string): Promise<Order | null>;
-    getByuserid(userid: string): Promise<Order[]>;
+    getByUserId(userid: string): Promise<Order[]>;
     update(order: Order): Promise<Order | null>;
 }
 
@@ -123,7 +123,7 @@ export class PostgresOrderRepository implements IOrderRepository {
 
             const orderData = result.rows[0];
             const positionResult = await client.query(`SELECT * FROM positions WHERE orderid = $1`, [orderId]);
-            const positions: Position[] = positionResult.rows.map(row => (new Position(
+            const positions: OrderPosition[] = positionResult.rows.map(row => (new OrderPosition(
                 row.id,
                 row.orderid,
                 row.productid,
@@ -146,7 +146,7 @@ export class PostgresOrderRepository implements IOrderRepository {
         }
     }
 
-    async getByuserid(userid: string): Promise<Order[]> {
+    async getByUserId(userid: string): Promise<Order[]> {
         const client = await this.pool.connect();
         try {
             const result = await client.query(`SELECT * FROM orders WHERE userid = $1`, [userid]);
@@ -155,7 +155,7 @@ export class PostgresOrderRepository implements IOrderRepository {
             const orders: Order[] = [];
             for (const orderData of result.rows) {
                 const positionResult = await client.query(`SELECT * FROM positions WHERE orderid = $1`, [orderData.id]);
-                const positions: Position[] = positionResult.rows.map(row => (new Position(
+                const positions: OrderPosition[] = positionResult.rows.map(row => (new OrderPosition(
                     row.id,
                     row.orderid,
                     row.productid,
@@ -202,7 +202,7 @@ export class PostgresOrderRepository implements IOrderRepository {
             );
             const positionResults = await Promise.all(positionPromises);
             // Сохраняем идентификаторы новых позиций в массиве позиций заказа
-            order.positions = positionResults.map(result => new Position(result.rows[0].id, order.id, result.rows[0].productid, result.rows[0].products_amount));
+            order.positions = positionResults.map(result => new OrderPosition(result.rows[0].id, order.id, result.rows[0].productid, result.rows[0].products_amount));
             await client.query('COMMIT');
     
             return order;
