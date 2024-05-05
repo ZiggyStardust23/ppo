@@ -1,75 +1,90 @@
 import { IBasketRepository } from './BasketRepository';
 import { Basket, BasketPosition } from './BasketModel';
-import { updateBasketDTO } from './BasketDTO';
+import { basketServiceError, returnBasketDTO, updateBasketDTO } from './BasketDTO';
 
 interface IBasketService {
-    findByuserid(userid: string): Promise<Basket | null>;
-    create(userid: string): Promise<Basket>;
+    findByUserId(userId: string): Promise<returnBasketDTO | basketServiceError>;
+    create(userId: string): Promise<returnBasketDTO>;
     clear(basketId: string): Promise<boolean>;
-    calculateTotalPrice(basketId: string): Promise<number | null>;
-    addProductsToBasket(basket: updateBasketDTO): Promise<Basket | null>;
-    removeProductsFromBasket(basket: updateBasketDTO): Promise<Basket | null>;
+    calculateTotalPrice(basketId: string): Promise<number | basketServiceError>;
+    addProductsToBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError>;
+    removeProductsFromBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError>;
 }
 
 export class BasketService implements IBasketService {
     constructor(private basketRepository: IBasketRepository) {}
 
-    public async create(userid: string): Promise<Basket> {
-        return this.basketRepository.create(userid);
+    public async create(userId: string): Promise<returnBasketDTO> {
+        const basketCreated = await this.basketRepository.create(userId);
+        return Promise.resolve(basketCreated.toDTO());
     }
 
-    public async findByuserid(userid: string): Promise<Basket | null> {
-        return this.basketRepository.getByuserid(userid);
+    public async findByUserId(userId: string): Promise<returnBasketDTO | basketServiceError> {
+        const basketGetted = await this.basketRepository.getByuserid(userId);
+        if (basketGetted == null){
+            return Promise.resolve({errormsg: "basket not found by id"});
+        }
+        return Promise.resolve(basketGetted.toDTO());
     }
 
     public async clear(basketId: string): Promise<boolean> {
         return this.basketRepository.clearBasket(basketId);
     }
 
-    public async calculateTotalPrice(basketId: string): Promise<number | null> {
+    public async calculateTotalPrice(basketId: string): Promise<number | basketServiceError> {
         const checkBasket = await this.basketRepository.getById(basketId);
         if (checkBasket == null){
-            return Promise.resolve(null);
+            return Promise.resolve({errormsg: "basket not found by id"});
         }
         return this.basketRepository.calculateTotalPrice(basketId);
     }
 
-    public async addProductsToBasket(basket: updateBasketDTO): Promise<Basket | null> {
-        const checkBasket = await this.basketRepository.getById(basket.basketId);
+    public async addProductsToBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError> {
+        const checkBasket = await this.basketRepository.getById(basket.id);
         if (checkBasket == null){
-            return null;
+            return Promise.resolve({errormsg: "basket not found by id"});
         }
         //Чтобы одинаковые позиции не попадали в basket
         let filteredPositions = basket.positions.filter(function(pos) {
             for (let dbPos of checkBasket.positions){
-                if (dbPos.phoneId === pos.phoneId && dbPos.productsAmount === pos.productsAmount){
+                if (dbPos.phoneId === pos.productId && dbPos.productsAmount === pos.productsAmount){
                     return false;
                 }
             }
             return true;
         })
         for (let pos of filteredPositions){
-            checkBasket.positions.push(pos);
+            checkBasket.positions.push(new BasketPosition("", basket.id, pos.productId, pos.productsAmount));
         }
         
-        return await this.basketRepository.update(checkBasket);
+        const basketUpdated = await this.basketRepository.update(checkBasket);
+        if (basketUpdated == null){
+            return Promise.resolve({errormsg: "basket not updated, error occured"});
+        }
+
+        return Promise.resolve(basketUpdated.toDTO());
     }
 
-    public async removeProductsFromBasket(basket: updateBasketDTO): Promise<Basket | null> {
-        const checkBasket = await this.basketRepository.getById(basket.basketId);
+    public async removeProductsFromBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError> {
+        const checkBasket = await this.basketRepository.getById(basket.id);
         if (checkBasket == null){
-            return Promise.resolve(null);
+            return Promise.resolve({errormsg: "basket not found by id"});
         }
         checkBasket.positions = checkBasket.positions.filter(function(pos) {
             for (let delPos of basket.positions){
-                if (delPos.phoneId === pos.phoneId && delPos.productsAmount === pos.productsAmount){
+                if (delPos.productId === pos.phoneId && delPos.productsAmount === pos.productsAmount){
                     return false;
                 }
             }
             return true;
         })
 
-        return await this.basketRepository.update(checkBasket);
+        const basketUpdated = await this.basketRepository.update(checkBasket);
+        if (basketUpdated == null){
+            return Promise.resolve({errormsg: "basket not updated, error occured"});
+        }
+
+        return Promise.resolve(basketUpdated.toDTO());
     }
 }
 

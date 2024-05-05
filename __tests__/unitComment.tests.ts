@@ -14,12 +14,12 @@ describe('CommentService', () => {
 
     it('should create a comment', async () => {
         const productId = "test";
-        const userid = "test";
+        const userId = "test";
         const text = "anytext";
 
         const commentCreated = new Comment(
             "test", 
-            userid, 
+            userId, 
             productId,
             text,
             0,
@@ -27,29 +27,35 @@ describe('CommentService', () => {
         when(commentRepository.create(anything())).thenResolve(commentCreated);
     
         const result = await commentService.create({            
-            userid: userid,
+            userid: userId,
             productId: productId,
             text: text
         });
-        expect(result).toEqual(commentCreated);
+        expect(result).toEqual({
+                                id: "test", 
+                                userId: userId, 
+                                productId: productId,
+                                text: text,
+                                rate: 0
+                            });
     });
 
     it('findByProductId: success', async () => {
         const productId = "test";
-        const userid = "test";
+        const userId = "test";
         const text = "anytext";
 
         const commentsToFind = [
             new Comment(
             "test1", 
-            userid, 
+            userId, 
             productId,
             text,
             0,
         ),
         new Comment(
             "test2", 
-            userid, 
+            userId, 
             productId,
             text,
             0,
@@ -58,41 +64,48 @@ describe('CommentService', () => {
 
         when(commentRepository.getByProductId("test")).thenResolve(commentsToFind);
     
-
-        // Act
         const result = await commentService.findByProductId("test");
 
-        // Assert
-        expect(result).toEqual(commentsToFind);
-    });
+        expect(result).toEqual([{
+                                id: "test1", 
+                                userId: userId, 
+                                productId: productId,
+                                text: text,
+                                rate: 0
+                            },
+                            {
+                                id: "test2", 
+                                userId: userId, 
+                                productId: productId,
+                                text: text,
+                                rate: 0
+                            }]);
+                        });
 
     it('findByProductId: fail', async () => {
 
         when(commentRepository.getByProductId("badid")).thenResolve([]);
     
-
-        // Act
         const result = await commentService.findByProductId("badid");
 
-        // Assert
         expect(result).toEqual([]);
     });
 
     it('update rate', async () => {
         const productId = "test";
-        const userid = "test";
+        const userId = "test";
         const text = "anytext";
 
         const commentToFind = new Comment(
             "test", 
-            userid, 
+            userId, 
             productId,
             text,
             0,
         )
         const commentUpdated = new Comment(
             "test", 
-            userid, 
+            userId, 
             productId,
             text,
             5,
@@ -106,7 +119,13 @@ describe('CommentService', () => {
             rate: 5,
         })
 
-        expect(result).toEqual(commentUpdated);
+        expect(result).toEqual({
+                                id: "test", 
+                                userId: userId, 
+                                productId: productId,
+                                text: text,
+                                rate: 5
+                            });
     });
     it('update rate failed', async () => {
         when(commentRepository.getById("badid")).thenResolve(null);
@@ -115,7 +134,7 @@ describe('CommentService', () => {
             rate: 5,
         })
 
-        expect(result).toEqual(null);
+        expect(result).toEqual({errormsg: "comment to update not found"});
     });
     it('delete comment', async () => {
         when(commentRepository.delete("test")).thenResolve(true);

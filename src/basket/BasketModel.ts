@@ -1,3 +1,5 @@
+import { returnBasketDTO, returnBasketPositionDTO } from "./BasketDTO";
+
 export class Basket {
     private _id: string;
     public get id(): string {
@@ -6,12 +8,12 @@ export class Basket {
     public set id(value: string) {
         this._id = value;
     }
-    private _userid: string;
-    public get userid(): string {
-        return this._userid;
+    private _userId: string;
+    public get userId(): string {
+        return this._userId;
     }
-    public set userid(value: string) {
-        this._userid = value;
+    public set userId(value: string) {
+        this._userId = value;
     }
     private _positions: BasketPosition[];
     public get positions(): BasketPosition[] {
@@ -23,12 +25,23 @@ export class Basket {
     
     constructor(
         id: string,
-        userid: string,
+        userId: string,
         positions: BasketPosition[], 
     ){
         this._id = id;
-        this._userid = userid;
+        this._userId = userId;
         this._positions = positions
+    }
+    public toDTO(): returnBasketDTO{
+        const basketPositionsDTO: returnBasketPositionDTO[] = [];
+        for (let i = 0; i < this.positions.length; i++){
+            basketPositionsDTO.push(this.positions[i].toDTO());
+        }
+        return {
+            id: this.id,
+            userId: this.userId,
+            positions: basketPositionsDTO,
+        }
     }
 }
 
@@ -71,5 +84,14 @@ export class BasketPosition {
         this._basketId = basketId;
         this._phoneId = phoneId;
         this._productsAmount = productsAmount;
+    }
+
+    public toDTO(): returnBasketPositionDTO{
+        return {
+            id: this.id,
+            basketId: this.basketId,
+            productId: this.phoneId,
+            productsAmount: this.productsAmount
+        }
     }
 };

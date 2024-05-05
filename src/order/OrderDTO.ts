@@ -1,5 +1,3 @@
-import {OrderPosition } from "./OrderModel"
-
 type orderCreateDTO = {
     userid: string,
     address: string,

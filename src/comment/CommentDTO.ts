@@ -9,4 +9,16 @@ type commentUpdateRateDTO = {
     rate: number
 }
 
-export {commentCreateDTO, commentUpdateRateDTO}
+type commentServiceError = {
+    errormsg: string;
+}
+
+type returnCommentDTO = {
+    id: string, 
+    userId: string, 
+    productId: string,
+    text: string,
+    rate: number
+}
+
+export {commentCreateDTO, commentUpdateRateDTO, commentServiceError, returnCommentDTO}

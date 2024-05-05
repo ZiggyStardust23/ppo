@@ -1,3 +1,5 @@
+import { returnCommentDTO } from "./CommentDTO";
+
 export class Comment {
     private _id: string;
     public get id(): string {
@@ -6,12 +8,12 @@ export class Comment {
     public set id(value: string) {
         this._id = value;
     }
-    private _userid: string;
-    public get userid(): string {
-        return this._userid;
+    private _userId: string;
+    public get userId(): string {
+        return this._userId;
     }
     public set userid(value: string) {
-        this._userid = value;
+        this._userId = value;
     }
     private _productId: string;
     public get productId(): string {
@@ -37,15 +39,25 @@ export class Comment {
 
     constructor(
         id: string, 
-        userid: string, 
+        userId: string, 
         productId: string,
         text: string,
         rate: number
     ){
         this._id = id;
-        this._userid = userid;
+        this._userId = userId;
         this._productId = productId;
         this._text = text;
         this._rate = rate;
+    }
+
+    public toDTO(): returnCommentDTO{
+        return {
+            id: this.id, 
+            userId: this.userId, 
+            productId: this.productId,
+            text: this.text,
+            rate: this.rate   
+        }
     }
 }
