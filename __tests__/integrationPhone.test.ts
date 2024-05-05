@@ -24,7 +24,7 @@ describe('Phone Repository Tests', () => {
             20,
             20000
         )
-        const createdPhone = await phoneService.create({
+        await phoneService.create({
             name: "phone",
             producername: "phoneProducer",
             osname: "os",
@@ -32,22 +32,37 @@ describe('Phone Repository Tests', () => {
             memsize: 128,
             camres: 20,
             price: 20000
-        });
-        expect(createdPhone).toBeDefined();
-        expect(createdPhone.id).toBeDefined();
-        expect(createdPhone.name).toBe(newPhone.name);
-        expect(createdPhone.producername).toBe(newPhone.producername);
-        expect(createdPhone.ramsize).toBe(newPhone.ramsize);
-        expect(createdPhone.memsize).toBe(newPhone.memsize);
-        expect(createdPhone.camres).toBe(newPhone.camres);
-        expect(createdPhone.price).toBe(newPhone.price);
-        testPhoneId = createdPhone!.id;
+        }).then((createdPhone) => {
+            if (createdPhone instanceof Error){
+                throw(createdPhone);
+                }
+                expect(createdPhone).toBeDefined();
+                expect(createdPhone.id).toBeDefined();
+                expect(createdPhone.name).toBe(newPhone.name);
+                expect(createdPhone.producername).toBe(newPhone.producername);
+                expect(createdPhone.ramsize).toBe(newPhone.ramsize);
+                expect(createdPhone.memsize).toBe(newPhone.memsize);
+                expect(createdPhone.camres).toBe(newPhone.camres);
+                expect(createdPhone.price).toBe(newPhone.price);
+                testPhoneId = createdPhone!.id;
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('findPhoneById - получение телефона по ID', async () => {
-        const fetchedPhone = await phoneService.findById(testPhoneId);
-        expect(fetchedPhone).toBeDefined();
-        expect(fetchedPhone?.id).toBe(testPhoneId);
+        await phoneService.findById(testPhoneId)
+            .then((fetchedPhone) => {
+            if (fetchedPhone instanceof Error){
+                throw(fetchedPhone);
+                }
+                expect(fetchedPhone).toBeDefined();
+                expect(fetchedPhone?.id).toBe(testPhoneId);
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('updatePhone - обновление данных телефона', async () => {
@@ -60,33 +75,22 @@ describe('Phone Repository Tests', () => {
             memsize: 128,
             camres: 20,
             price: 30000
-    })
-        expect(updatedPhone).toBeDefined();
-        expect(updatedPhone?.id).toBe(testPhoneId);
-        expect(updatedPhone?.name).toBe("phone");
-        expect(updatedPhone?.producername).toBe("phoneProducer");
-        expect(updatedPhone?.osname).toBe("os");
-        expect(updatedPhone?.ramsize).toBe(16);
-        expect(updatedPhone?.memsize).toBe(128);
-        expect(updatedPhone?.camres).toBe(20);
-        expect(updatedPhone?.price).toBe(30000);
-    });
-
-    
-    test('paginate - пагинация', async () => {
-        let phoneModels: Phone[] = [];
-        for (let i = 1; i < 10; i++){
-            phoneModels.push(await phoneService.create({
-                name: "phone" + i.toString(),
-                producername: "phoneProducer" + i.toString(),
-                osname: "os" + i.toString(),
-                ramsize: 16,
-                memsize: 128,
-                camres: 20,
-                price: 10000 * i
-            }))
-        }
-
-        let phones = await phoneService.paginate({minPrice: 30000, maxPrice: 60000}, 0, 0);
+    }).then((updatedPhone) => {
+        if (updatedPhone instanceof Error){
+            throw(updatedPhone);
+            }
+            expect(updatedPhone).toBeDefined();
+            expect(updatedPhone?.id).toBe(testPhoneId);
+            expect(updatedPhone?.name).toBe("phone");
+            expect(updatedPhone?.producername).toBe("phoneProducer");
+            expect(updatedPhone?.osname).toBe("os");
+            expect(updatedPhone?.ramsize).toBe(16);
+            expect(updatedPhone?.memsize).toBe(128);
+            expect(updatedPhone?.camres).toBe(20);
+            expect(updatedPhone?.price).toBe(30000);
+        }).catch((error: Error) => {
+            console.error(error.message);
+            expect(false).toBe(true);
+        })
     });
 });

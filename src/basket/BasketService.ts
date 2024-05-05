@@ -47,7 +47,7 @@ export class BasketService implements IBasketService {
         //Чтобы одинаковые позиции не попадали в basket
         let filteredPositions = basket.positions.filter(function(pos) {
             for (let dbPos of checkBasket.positions){
-                if (dbPos.phoneId === pos.productId && dbPos.productsAmount === pos.productsAmount){
+                if (dbPos.phoneId == pos.productId && dbPos.productsAmount == pos.productsAmount){
                     return false;
                 }
             }
@@ -72,7 +72,7 @@ export class BasketService implements IBasketService {
         }
         checkBasket.positions = checkBasket.positions.filter(function(pos) {
             for (let delPos of basket.positions){
-                if (delPos.productId === pos.phoneId && delPos.productsAmount === pos.productsAmount){
+                if (delPos.productId == pos.phoneId && delPos.productsAmount == pos.productsAmount){
                     return false;
                 }
             }

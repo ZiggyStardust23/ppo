@@ -16,18 +16,34 @@ describe('Payment Service Tests', () => {
 
     test('createPayment - создание платежа', async () => {
         await paymentRepository.initialize();
-        const newPayment = await paymentService.create('2');
-        expect(newPayment).toBeDefined();
-        expect(newPayment.id).toBeDefined();
-        expect(newPayment.orderId).toBe('2');
-        expect(newPayment.status).toBe(true);
-        testOrderId = newPayment.orderId;
+        await paymentService.create('2')
+        .then((newPayment) => {
+            if (newPayment instanceof Error){
+                throw(newPayment);
+                }
+                expect(newPayment).toBeDefined();
+                expect(newPayment.id).toBeDefined();
+                expect(newPayment.orderId).toBe('2');
+                expect(newPayment.status).toBe(true);
+                testOrderId = newPayment.orderId;
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('getPaymentById - получение платежа по ID', async () => {
-        const fetchedPayment = await paymentService.findById('2');
-        expect(fetchedPayment).toBeDefined();
-        expect(fetchedPayment?.id).toBe(2);
+        await paymentService.findById('2')
+        .then((fetchedPayment) => {
+            if (fetchedPayment instanceof Error){
+                throw(fetchedPayment);
+                }
+                expect(fetchedPayment).toBeDefined();
+                expect(fetchedPayment?.id).toBe(2);
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('updatePayment - обновление платежа', async () => {
@@ -36,17 +52,32 @@ describe('Payment Service Tests', () => {
             orderId: '2',
             status: false, // Предположим, что статус платежа был изменен на COMPLETED
             sum: 6000 // Предположим, что сумма платежа увеличилась до 6000
-        });
-        expect(updatedPayment).toBeDefined();
-        expect(updatedPayment?.id).toBe(testOrderId);
-        expect(updatedPayment?.orderId).toBe('2');
-        expect(updatedPayment?.status).toBe(false);
-        expect(updatedPayment?.sum).toBe(6000);
+        }).then((updatedPayment) => {
+            if (updatedPayment instanceof Error){
+                throw(updatedPayment);
+                }
+                expect(updatedPayment).toBeDefined();
+                expect(updatedPayment?.id).toBe(testOrderId);
+                expect(updatedPayment?.orderId).toBe('2');
+                expect(updatedPayment?.status).toBe(false);
+                expect(updatedPayment?.sum).toBe(6000);
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('getPaymentByOrderId - получение платежа по ID заказа', async () => {
-        const paymentByOrderId = await paymentService.findByOrderId('2');
-        expect(paymentByOrderId).toBeDefined();
-        expect(paymentByOrderId?.orderId).toBe(2);
+        await paymentService.findByOrderId('2')
+        .then((paymentByOrderId) => {
+            if (paymentByOrderId instanceof Error){
+                throw(paymentByOrderId);
+                }
+                expect(paymentByOrderId).toBeDefined();
+                expect(paymentByOrderId?.orderId).toBe(2);
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 });

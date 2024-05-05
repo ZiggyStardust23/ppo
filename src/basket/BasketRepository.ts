@@ -203,7 +203,7 @@ export class PostgresBasketRepository implements IBasketRepository {
 
             await client.query(
                 `UPDATE baskets SET userid = $1 WHERE id = $2`,
-                [basket.userid, basket.id]
+                [basket.userId, basket.id]
             );
 
             await client.query(`DELETE FROM basketpositions WHERE basketid = $1`, [basket.id]);

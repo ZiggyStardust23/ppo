@@ -1,5 +1,5 @@
 import { PostgresOrderRepository } from '../src/order/OrderRepository';
-import { OrderService, Order, OrderStatus, Position } from '../src/order/OrderService';
+import { OrderService, Order, OrderStatus, OrderPosition } from '../src/order/OrderService';
 import dotenv from 'dotenv';
 
 // Загружаем переменные окружения из .env
@@ -23,69 +23,112 @@ describe('Order Repository Tests', () => {
             new Date(),
             []
         );
-        const createdOrder = await orderService.create({
+        await orderService.create({
             userid: '2',
             address: 'some_address_here',
             positions: []
-        });
-        expect(createdOrder).toBeDefined();
-        expect(createdOrder.id).toBeDefined();
-        expect(createdOrder.userid).toBe(newOrder.userid);
-        expect(createdOrder.status).toBe(newOrder.status);
-        expect(createdOrder.address).toBe(newOrder.address);
-        expect(createdOrder.date).toBeDefined(); // Так как дата автоматически генерируется
-        expect(createdOrder.positions).toEqual(newOrder.positions);
-        testOrderId = createdOrder!.id;
+        }).then((createdOrder) => {
+            if (createdOrder instanceof Error){
+                throw(createdOrder);
+                }
+                expect(createdOrder).toBeDefined();
+                expect(createdOrder.id).toBeDefined();
+                expect(createdOrder.userid).toBe(newOrder.userid);
+                expect(createdOrder.status).toBe(newOrder.status);
+                expect(createdOrder.address).toBe(newOrder.address);
+                expect(createdOrder.date).toBeDefined(); // Так как дата автоматически генерируется
+                expect(createdOrder.positions).toEqual(newOrder.positions);
+                testOrderId = createdOrder!.id;
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('findOrderById - получение заказа по ID', async () => {
-        const fetchedOrder = await orderService.findById(testOrderId);
-        expect(fetchedOrder).toBeDefined();
-        expect(fetchedOrder?.id).toBe(testOrderId);
+        await orderService.findById(testOrderId)
+        .then((fetchedOrder) => {
+            if (fetchedOrder instanceof Error){
+                throw(fetchedOrder);
+                }
+                expect(fetchedOrder).toBeDefined();
+                expect(fetchedOrder?.id).toBe(testOrderId);
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('findByUserId - получение заказов по ID пользователя', async () => {
-        const fetchedOrders = await orderService.findByuserid('2');
-        expect(fetchedOrders).toBeDefined();
-        expect(fetchedOrders.length).toBeGreaterThan(0);
-        expect(fetchedOrders.every(order => order.userid == '2')).toBeTruthy();
+        await orderService.findByUserId('2')
+        .then((fetchedOrders) => {
+            if (fetchedOrders instanceof Error){
+                throw(fetchedOrders);
+                }
+                expect(fetchedOrders).toBeDefined();
+                expect(fetchedOrders.length).toBeGreaterThan(0);
+                expect(fetchedOrders.every(order => order.userid == '2')).toBeTruthy();
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('updateOrderStatus - обновление статуса заказа', async () => {
-        const updatedOrder = await orderService.updateOrderStatus({
+        await orderService.updateOrderStatus({
             id: testOrderId,
             status: OrderStatus.COMPLETED
-        });
-        expect(updatedOrder).toBeDefined();
-        expect(updatedOrder?.id).toBe(testOrderId);
-        expect(updatedOrder?.status).toBe(OrderStatus.COMPLETED);
+        })
+        .then((updatedOrder) => {
+            if (updatedOrder instanceof Error){
+                throw(updatedOrder);
+                }
+                expect(updatedOrder).toBeDefined();
+                expect(updatedOrder?.id).toBe(testOrderId);
+                expect(updatedOrder?.status).toBe(OrderStatus.COMPLETED);
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('addPositionsToOrder - добавление позиций в заказ', async () => {
-        const position: Position = new Position(
+        const position: OrderPosition = new OrderPosition(
             '',
             testOrderId,
             '2',
             2
         );
-        const updatedOrder = await orderService.addPositionsToOrder({
+        await orderService.addPositionsToOrder({
             id: testOrderId,
-            positions: [position]
-        });
-        posId = updatedOrder?.positions[0].id || '';
+            positions: [{id: " ", orderId: testOrderId, productId: '2', productsAmount: 2}, {id: " ", orderId: testOrderId, productId: '1', productsAmount: 2}]
+        }).then((updatedOrder) => {
+            if (updatedOrder instanceof Error){
+                throw(updatedOrder);
+                }
+                posId = updatedOrder.positions[0].id || '';
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 
     test('removePositionsFromOrder - удаление позиций из заказа', async () => {
-        const updatedOrder = await orderService.removePositionsFromOrder({
+        await orderService.removePositionsFromOrder({
         id: testOrderId,
-        positions: [new Position(
-                posId,
-                testOrderId,
-                '1',
-                2
-        )]})
-        expect(updatedOrder).toBeDefined();
-        expect(updatedOrder?.id).toBe(testOrderId);
-        expect(updatedOrder?.positions.length).toBe(0);
+        positions: [{id: posId, orderId: testOrderId, productId: '1', productsAmount: 2}]})
+        .then((updatedOrder) => {
+            if (updatedOrder instanceof Error){
+                throw(updatedOrder);
+                }
+                console.log(posId);
+                console.log(updatedOrder);
+                expect(updatedOrder).toBeDefined();
+                expect(updatedOrder?.id).toBe(testOrderId);
+                expect(updatedOrder?.positions.length).toBe(1);
+            }).catch((error: Error) => {
+                console.error(error.message);
+                expect(false).toBe(true);
+            })
     });
 });

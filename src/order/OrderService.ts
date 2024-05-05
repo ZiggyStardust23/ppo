@@ -76,7 +76,7 @@ export class OrderService implements IOrderService {
         //Чтобы одинаковые позиции не попадали в order
         let filteredPositions = order.positions.filter(function(pos) {
             for (let dbPos of checkOrder.positions){
-                if (dbPos.productId === pos.productId && dbPos.productsAmount === pos.productsAmount){
+                if (dbPos.productId == pos.productId && dbPos.productsAmount == pos.productsAmount){
                     return false;
                 }
             }
@@ -100,7 +100,7 @@ export class OrderService implements IOrderService {
         }
         checkOrder.positions = checkOrder.positions.filter(function(pos) {
             for (let delPos of order.positions){
-                if (delPos.productId === pos.productId && delPos.productsAmount === pos.productsAmount){
+                if (delPos.productId == pos.productId && delPos.productsAmount == pos.productsAmount){
                     return false;
                 }
             }

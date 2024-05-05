@@ -64,7 +64,7 @@ export class PostgresCommentRepository implements ICommentRepository {
         try {
             const result = await client.query(
                 `INSERT INTO comments (userid, product_id, text, rate) VALUES ($1, $2, $3, $4) RETURNING *`,
-                [comment.userid, comment.productId, comment.text, comment.rate]
+                [comment.userId, comment.productId, comment.text, comment.rate]
             );
             const createdComment = result.rows[0];
             return new Comment(
@@ -133,7 +133,7 @@ export class PostgresCommentRepository implements ICommentRepository {
         try {
             const result = await client.query(
                 `UPDATE comments SET userid = $1, product_id = $2, text = $3, rate = $4 WHERE id = $5 RETURNING *`,
-                [comment.userid, comment.productId, comment.text, comment.rate, comment.id]
+                [comment.userId, comment.productId, comment.text, comment.rate, comment.id]
             );
             if (result.rows.length === 0) return null;
             const updatedComment = result.rows[0];

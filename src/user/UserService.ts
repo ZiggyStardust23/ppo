@@ -78,7 +78,7 @@ export class UserService implements IUserService {
 
     async updateUser(upDTO: updateDTO): Promise<returnUserDTO | Error> {
         const hashedPswd = await hashPswd(upDTO.password);
-        const userToUpdate = new User(upDTO.id, upDTO.name, upDTO.email, hashedPswd, upDTO.phone_number, userRole.UserRoleCustomer);
+        const userToUpdate = new User(upDTO.id, upDTO.name, upDTO.email, hashedPswd, upDTO.phone_number, upDTO.role);
         const userUpdated = await this.userRepository.update(userToUpdate);
         if (userUpdated == null){
             return Promise.reject(new Error("user to update not found by id"))
