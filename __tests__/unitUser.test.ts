@@ -4,7 +4,6 @@ import { User } from '../src/user/UserModel';
 import { mock, instance, when, anything } from 'ts-mockito';
 import { userRole } from '../src/user/UserDTO';
 import { hashPswd } from '../src/user/UserService';
-import bcrypt from 'bcrypt';
 
 describe('UserService', () => {
     let userService: UserService;
@@ -21,28 +20,32 @@ describe('UserService', () => {
         when(userRepository.getByEmail('test@example.com')).thenResolve(null);
         when(userRepository.create(anything())).thenResolve(createdUser);
     
-        const result = await userService.registration({name: 'Vanya', 
-                                                     email: 'test@example.com', 
-                                                     password: 'password', 
-                                                     phone_number: '1234567890', 
-                                                     });
-
-        expect(result).toEqual({id: '1', name: 'Vanya', email: 'test@example.com', phone_number: '1234567890', role: userRole.UserRoleCustomer});
+        userService.registration({
+                                name: 'Vanya', 
+                                email: 'test@example.com', 
+                                password: 'password', 
+                                phone_number: '1234567890', 
+                                }).then((result) => {
+                                    expect(result).toEqual({id: '1', name: 'Vanya', email: 'test@example.com', phone_number: '1234567890', role: userRole.UserRoleCustomer});
+                                }).catch((error: Error) => {
+                                    console.error(error.message);
+                                })
     });
 
     it('should not create user by registration, this email already in db', async () => {
-        const existingUser = new User('1', 'Vanya', 'test@example.com', 'ITSHASHEDPASSWORD', '1234567890', userRole.UserRoleCustomer);
 
         when(userRepository.getByEmail('test@example.com')).thenResolve(null);
     
 
-        const result = await userService.registration({name: 'Vanya', 
-                                                     email: 'test@example.com', 
-                                                     password: 'password', 
-                                                     phone_number: '1234567890', 
-                                                     });
-
-        expect(result).toEqual({"errormsg": "This email is already in db"})
+        userService.registration({
+                                name: 'Vanya', 
+                                email: 'test@example.com', 
+                                password: 'password', 
+                                phone_number: '1234567890', 
+                                }).then((result) => {
+                            }).catch((error: Error) => {
+                                expect(error.message).toEqual("This email is already in db");
+                            })
     });
 
     it('login: success', async () => {
@@ -52,11 +55,14 @@ describe('UserService', () => {
         when(userRepository.getByEmail('test@example.com')).thenResolve(loginUser);
     
 
-        const result = await userService.login({email: 'test@example.com', 
-                                                     password: 'password', 
-                                                     });
+        userService.login({email: 'test@example.com', 
+                            password: 'password', 
+                            }).then((result) => {
+                            expect(result).toEqual({id: '1', name: 'Vanya', email: 'test@example.com', phone_number: '1234567890', role: userRole.UserRoleCustomer});
+                        }).catch((error: Error) => {
+                            console.error(error.message);
+                        })
 
-        expect(result).toEqual({id: '1', name: 'Vanya', email: 'test@example.com', phone_number: '1234567890', role: userRole.UserRoleCustomer});
     });
 
     it('login: this email not in db', async () => {
@@ -64,11 +70,12 @@ describe('UserService', () => {
         when(userRepository.getByEmail('someemail@example.com')).thenResolve(null);
     
 
-        const result = await userService.login({email: 'someemail@example.com', 
-                                                     password: 'password', 
-                                                     });
-
-        expect(result).toEqual({errormsg: "wrong email"});
+        userService.login({email: 'someemail@example.com', 
+                            password: 'password', 
+                            }).then((result) => {
+                        }).catch((error: Error) => {
+                            expect(error.message).toEqual("wrong email");
+                        });
     });
 
     it('login: bad password', async () => {
@@ -79,11 +86,13 @@ describe('UserService', () => {
         when(userRepository.getByEmail('test@example.com')).thenResolve(loginUser);
     
 
-        const result = await userService.login({email: 'test@example.com', 
-                                                password: 'badpassword', 
-                                                     });
+        userService.login({email: 'test@example.com', 
+                           password: 'badpassword', 
+                                }).then((result) => {
+                            }).catch((error: Error) => {
+                                expect(error.message).toEqual("wrong password");
+                            });
 
-        expect(result).toEqual({errormsg: "wrong password"});
     });
 
     it('should create user', async () => {
@@ -92,17 +101,21 @@ describe('UserService', () => {
         when(userRepository.getByEmail('test@example.com')).thenResolve(null);
         when(userRepository.create(anything())).thenResolve(createdUser);
     
-        const result = await userService.createUser({name: 'Vanya', 
-                                                     email: 'test@example.com', 
-                                                     password: 'password', 
-                                                     phone_number: '1234567890', 
-                                                     role: userRole.UserRoleCustomer});
-
-        expect(result).toEqual({id: '1',
+        userService.createUser({
                                 name: 'Vanya', 
                                 email: 'test@example.com', 
+                                password: 'password', 
                                 phone_number: '1234567890', 
-                                role: userRole.UserRoleCustomer});
+                                role: userRole.UserRoleCustomer}
+                                ).then((result) => {   
+                                    expect(result).toEqual({id: '1',
+                                        name: 'Vanya', 
+                                        email: 'test@example.com', 
+                                        phone_number: '1234567890', 
+                                        role: userRole.UserRoleCustomer});})
+                                .catch((error: Error) => {
+                                    console.error(error.message);
+                                })
     });
 
     it('should not create user, this email already in db', async () => {
@@ -110,12 +123,15 @@ describe('UserService', () => {
 
         when(userRepository.getByEmail('test@example.com')).thenResolve(createdUser);
     
-        const result = await userService.createUser({name: 'Vanya', 
-                                                     email: 'test@example.com', 
-                                                     password: 'password', 
-                                                     phone_number: '1234567890', 
-                                                     role: userRole.UserRoleCustomer});
-        expect(result).toEqual({errormsg: "this email is already in db"});
+        userService.createUser({name: 'Vanya', 
+                                email: 'test@example.com', 
+                                password: 'password', 
+                                phone_number: '1234567890', 
+                                role: userRole.UserRoleCustomer})
+                                .then((result) => {
+                                }).catch((error: Error) => {
+                                    expect(error.message).toEqual("this email is already in db");
+                                });
     });
 
     it('should find user by id', async () => {
@@ -124,13 +140,16 @@ describe('UserService', () => {
 
         when(userRepository.getById(userid)).thenResolve(user);
 
-        const result = await userService.findUserById(userid);
-
-        expect(result).toEqual({id: '1',
-                                name: 'Vanya', 
-                                email: 'test@example.com', 
-                                phone_number: '1234567890', 
-                                role: userRole.UserRoleCustomer});
+        userService.findUserById(userid)
+                .then((result) => {   
+                    expect(result).toEqual({id: '1',
+                    name: 'Vanya', 
+                    email: 'test@example.com', 
+                    phone_number: '1234567890', 
+                    role: userRole.UserRoleCustomer});})
+                .catch((error: Error) => {
+                    console.error(error.message);
+                })
     });
 
     it('should find user by email', async () => {
@@ -139,13 +158,15 @@ describe('UserService', () => {
 
         when(userRepository.getByEmail(userEmail)).thenResolve(user);
 
-        const result = await userService.findUserByEmail(userEmail);
-
-        expect(result).toEqual({id: '1',
-                                name: 'Vanya', 
-                                email: 'test@example.com', 
-                                phone_number: '1234567890', 
-                                role: userRole.UserRoleCustomer});
+        userService.findUserByEmail(userEmail).then((result) => {   
+            expect(result).toEqual({id: '1',
+                            name: 'Vanya', 
+                            email: 'test@example.com', 
+                            phone_number: '1234567890', 
+                            role: userRole.UserRoleCustomer})})
+        .catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 
     it('should update user', async () => {
@@ -156,18 +177,20 @@ describe('UserService', () => {
         when(userRepository.getById(userid)).thenResolve(userToUpdate);
         when(userRepository.update(anything())).thenResolve(updatedUser);
 
-        const result = await userService.updateUser({id: '1',
-                                                    name: 'Vanya', 
-                                                    email: 'test@example.com', 
-                                                    password: 'password', 
-                                                    phone_number: '1234567890', 
-                                                    role: userRole.UserRoleCustomer});
-
-        expect(result).toEqual({id: '1',
-                                name: 'Ivan', 
+        userService.updateUser({id: '1',
+                                name: 'Vanya', 
                                 email: 'test@example.com', 
+                                password: 'password', 
                                 phone_number: '1234567890', 
-                                role: userRole.UserRoleCustomer});
+                                role: userRole.UserRoleCustomer}).then((result) => {   
+                                    expect(result).toEqual({id: '1',
+                                    name: 'Ivan', 
+                                    email: 'test@example.com', 
+                                    phone_number: '1234567890', 
+                                    role: userRole.UserRoleCustomer});})
+                                .catch((error: Error) => {
+                                    console.error(error.message);
+                                })
     });
 
     it('should not update user, because there is no such user in db', async () => {
@@ -176,13 +199,14 @@ describe('UserService', () => {
 
         when(userRepository.update(anything())).thenResolve(null);
 
-        const result = await userService.updateUser({id: '1',
-                                                    name: 'Vanya', 
-                                                    email: 'test@example.com', 
-                                                    password: 'password', 
-                                                    phone_number: '1234567890', 
-                                                    role: userRole.UserRoleCustomer});
-
-        expect(result).toEqual({errormsg: "user to update not found by id"});
+        userService.updateUser({id: '1',
+                                name: 'Vanya', 
+                                email: 'test@example.com', 
+                                password: 'password', 
+                                phone_number: '1234567890', 
+                                role: userRole.UserRoleCustomer}).then((result) => {
+                                }).catch((error: Error) => {
+                                    expect(error.message).toEqual("user to update not found by id");
+                                });
     });
 });

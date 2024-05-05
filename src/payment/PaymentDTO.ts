@@ -12,6 +12,4 @@ type returnPaymentDTO = {
     sum: number
 }
 
-type paymentServiceError = {errormsg: string};
-
-export {paymentUpdateDTO, returnPaymentDTO, paymentServiceError}
+export {paymentUpdateDTO, returnPaymentDTO}

@@ -1,14 +1,14 @@
 import { IBasketRepository } from './BasketRepository';
 import { Basket, BasketPosition } from './BasketModel';
-import { basketServiceError, returnBasketDTO, updateBasketDTO } from './BasketDTO';
+import { returnBasketDTO, updateBasketDTO } from './BasketDTO';
 
 interface IBasketService {
-    findByUserId(userId: string): Promise<returnBasketDTO | basketServiceError>;
+    findByUserId(userId: string): Promise<returnBasketDTO | Error>;
     create(userId: string): Promise<returnBasketDTO>;
     clear(basketId: string): Promise<boolean>;
-    calculateTotalPrice(basketId: string): Promise<number | basketServiceError>;
-    addProductsToBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError>;
-    removeProductsFromBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError>;
+    calculateTotalPrice(basketId: string): Promise<number | Error>;
+    addProductsToBasket(basket: updateBasketDTO): Promise<returnBasketDTO | Error>;
+    removeProductsFromBasket(basket: updateBasketDTO): Promise<returnBasketDTO | Error>;
 }
 
 export class BasketService implements IBasketService {
@@ -19,10 +19,10 @@ export class BasketService implements IBasketService {
         return Promise.resolve(basketCreated.toDTO());
     }
 
-    public async findByUserId(userId: string): Promise<returnBasketDTO | basketServiceError> {
+    public async findByUserId(userId: string): Promise<returnBasketDTO | Error> {
         const basketGetted = await this.basketRepository.getByuserid(userId);
         if (basketGetted == null){
-            return Promise.resolve({errormsg: "basket not found by id"});
+            return Promise.reject(new Error("basket not found by id"));
         }
         return Promise.resolve(basketGetted.toDTO());
     }
@@ -31,18 +31,18 @@ export class BasketService implements IBasketService {
         return this.basketRepository.clearBasket(basketId);
     }
 
-    public async calculateTotalPrice(basketId: string): Promise<number | basketServiceError> {
+    public async calculateTotalPrice(basketId: string): Promise<number | Error> {
         const checkBasket = await this.basketRepository.getById(basketId);
         if (checkBasket == null){
-            return Promise.resolve({errormsg: "basket not found by id"});
+            return Promise.reject(new Error("basket not found by id"));
         }
         return this.basketRepository.calculateTotalPrice(basketId);
     }
 
-    public async addProductsToBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError> {
+    public async addProductsToBasket(basket: updateBasketDTO): Promise<returnBasketDTO | Error> {
         const checkBasket = await this.basketRepository.getById(basket.id);
         if (checkBasket == null){
-            return Promise.resolve({errormsg: "basket not found by id"});
+            return Promise.reject(new Error("basket not found by id"));
         }
         //Чтобы одинаковые позиции не попадали в basket
         let filteredPositions = basket.positions.filter(function(pos) {
@@ -59,16 +59,16 @@ export class BasketService implements IBasketService {
         
         const basketUpdated = await this.basketRepository.update(checkBasket);
         if (basketUpdated == null){
-            return Promise.resolve({errormsg: "basket not updated, error occured"});
+            return Promise.reject(new Error("basket not updated, error occured"));
         }
 
         return Promise.resolve(basketUpdated.toDTO());
     }
 
-    public async removeProductsFromBasket(basket: updateBasketDTO): Promise<returnBasketDTO | basketServiceError> {
+    public async removeProductsFromBasket(basket: updateBasketDTO): Promise<returnBasketDTO | Error> {
         const checkBasket = await this.basketRepository.getById(basket.id);
         if (checkBasket == null){
-            return Promise.resolve({errormsg: "basket not found by id"});
+            return Promise.reject(new Error("basket not found by id"));
         }
         checkBasket.positions = checkBasket.positions.filter(function(pos) {
             for (let delPos of basket.positions){
@@ -81,7 +81,7 @@ export class BasketService implements IBasketService {
 
         const basketUpdated = await this.basketRepository.update(checkBasket);
         if (basketUpdated == null){
-            return Promise.resolve({errormsg: "basket not updated, error occured"});
+            return Promise.reject(new Error("basket not updated, error occured"));
         }
 
         return Promise.resolve(basketUpdated.toDTO());

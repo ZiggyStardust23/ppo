@@ -35,10 +35,6 @@ enum OrderStatus {
     CANCELLED
 }
 
-type orderServiceError = {
-    errormsg: string;
-}
-
 type returnOrderDTO = {
     id: string,
     userid: string,
@@ -48,4 +44,4 @@ type returnOrderDTO = {
     positions: returnOrderPositionDTO[],
 }
 
-export {orderCreateDTO, orderUpdatePositions, orderUpdateStatus, orderPositionDTO, returnOrderDTO, returnOrderPositionDTO, OrderStatus, orderServiceError}
+export {orderCreateDTO, orderUpdatePositions, orderUpdateStatus, orderPositionDTO, returnOrderDTO, returnOrderPositionDTO, OrderStatus}

@@ -41,8 +41,4 @@ enum userRole {
     UserRoleCustomer = 2
 }
 
-type userServiceError = {
-    errormsg: string;
-}
-
-export {registrationDTO, loginDTO, createDTO, returnUserDTO, updateDTO, userRole, userServiceError}
+export {registrationDTO, loginDTO, createDTO, returnUserDTO, updateDTO, userRole}

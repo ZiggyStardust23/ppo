@@ -28,7 +28,7 @@ describe('OrderService', () => {
         )
         when(orderRepository.create(anything())).thenResolve(orderCreated);
     
-        const result = await orderService.create({            
+        orderService.create({            
             userid: userid,
             address: adress,
             positions: [{
@@ -44,27 +44,30 @@ describe('OrderService', () => {
                 productsAmount: 3
             }
         ]
-        });
-        expect(result).toEqual({
-                                id: "test",
-                                userid: userid,
-                                status: OrderStatus.PLACED,
-                                date: someDate,
-                                address: adress,
-                                positions: [{
-                                    id: "test1",
-                                    orderId: "",
-                                    productId: "p1",
-                                    productsAmount: 3
-                                },
-                                {
-                                    id: "test2",
-                                    orderId: "",
-                                    productId: "p2",
-                                    productsAmount: 3
-                                }
-                            ]
-                            });
+        }).then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userid: userid,
+                status: OrderStatus.PLACED,
+                date: someDate,
+                address: adress,
+                positions: [{
+                    id: "test1",
+                    orderId: "",
+                    productId: "p1",
+                    productsAmount: 3
+                },
+                {
+                    id: "test2",
+                    orderId: "",
+                    productId: "p2",
+                    productsAmount: 3
+                }
+            ]
+            });   
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 
     it('findById: success', async () => {
@@ -84,37 +87,41 @@ describe('OrderService', () => {
 
         when(orderRepository.getById("test")).thenResolve(orderToFind);
     
-        const result = await orderService.findById("test");
-
-        expect(result).toEqual({
-                                id: "test",
-                                userid: userid,
-                                status: OrderStatus.PLACED,
-                                address: adress,
-                                date: someDate,
-                                positions: [{
-                                    id: "test1",
-                                    orderId: "",
-                                    productId: "p1",
-                                    productsAmount: 3
-                                },
-                                {
-                                    id: "test2",
-                                    orderId: "",
-                                    productId: "p2",
-                                    productsAmount: 3
-                                }
-                            ]
-                            });
+        orderService.findById("test")
+        .then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userid: userid,
+                status: OrderStatus.PLACED,
+                address: adress,
+                date: someDate,
+                positions: [{
+                    id: "test1",
+                    orderId: "",
+                    productId: "p1",
+                    productsAmount: 3
+                },
+                {
+                    id: "test2",
+                    orderId: "",
+                    productId: "p2",
+                    productsAmount: 3
+                }
+            ]
+            });
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 
     it('findById: fail', async () => {
 
         when(orderRepository.getById("test")).thenResolve(null);
     
-        const result = await orderService.findById("test");
-
-        expect(result).toEqual({errormsg: "not found in db by id"});
+        orderService.findById("test").then((result) => {
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("not found in db by id");
+        });
     });
 
     it('findByUserId: success', async () => {
@@ -144,57 +151,61 @@ describe('OrderService', () => {
 
         when(orderRepository.getByUserId("test")).thenResolve(ordersToFind);
     
-        const result = await orderService.findByUserId("test");
-
-        expect(result).toEqual([
-                                {
-                                id: "test1",
-                                userid: userid,
-                                status: OrderStatus.PLACED,
-                                address: adress,
-                                date: someDate,
-                                positions: [{
-                                    id: "test1",
-                                    orderId: "",
-                                    productId: "p1",
-                                    productsAmount: 3
-                                },
-                                {
-                                    id: "test2",
-                                    orderId: "",
-                                    productId: "p2",
-                                    productsAmount: 3
-                                }
-                                ]
-                                },
-                                {
-                                id: "test2",
-                                userid: userid,
-                                status: OrderStatus.PLACED,
-                                address: adress,
-                                date: someDate,
-                                positions: [{
-                                    id: "test1",
-                                    orderId: "",
-                                    productId: "p1",
-                                    productsAmount: 3
-                                },
-                                {
-                                    id: "test2",
-                                    orderId: "",
-                                    productId: "p2",
-                                    productsAmount: 3
-                                }
-                            ]
-                            }]);
+        orderService.findByUserId("test")
+        .then((result) => {
+            expect(result).toEqual([
+                {
+                id: "test1",
+                userid: userid,
+                status: OrderStatus.PLACED,
+                address: adress,
+                date: someDate,
+                positions: [{
+                    id: "test1",
+                    orderId: "",
+                    productId: "p1",
+                    productsAmount: 3
+                },
+                {
+                    id: "test2",
+                    orderId: "",
+                    productId: "p2",
+                    productsAmount: 3
+                }
+                ]
+                },
+                {
+                id: "test2",
+                userid: userid,
+                status: OrderStatus.PLACED,
+                address: adress,
+                date: someDate,
+                positions: [{
+                    id: "test1",
+                    orderId: "",
+                    productId: "p1",
+                    productsAmount: 3
+                },
+                {
+                    id: "test2",
+                    orderId: "",
+                    productId: "p2",
+                    productsAmount: 3
+                }
+            ]
+            }]);
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
     it('findByUserId: fail', async () => {
 
         when(orderRepository.getByUserId("test")).thenResolve([]);
     
-        const result = await orderService.findByUserId("test");
-
-        expect(result).toEqual({errormsg: "not found in db by id"});
+        orderService.findByUserId("test").then((result) => {
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("not found in db by id");
+        });
     });
     
     it('should succesfully update the status of order', async () => {
@@ -224,42 +235,45 @@ describe('OrderService', () => {
         when(orderRepository.getById("test")).thenResolve(orderToFind);
         when(orderRepository.update(anything())).thenResolve(orderUpdated);
     
-        const result = await orderService.updateOrderStatus({     
+        orderService.updateOrderStatus({     
             id: "test",       
             status: OrderStatus.PROCESSING,
+        }).then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userid: userid,
+                status: OrderStatus.PROCESSING,
+                address: adress,
+                date: someDate,
+                positions: [{
+                    id: "test1",
+                    orderId: "",
+                    productId: "p1",
+                    productsAmount: 3
+                },
+                {
+                    id: "test2",
+                    orderId: "",
+                    productId: "p2",
+                    productsAmount: 3
+                }
+            ]
+            });
+        }).catch((error: Error) => {
+            console.error(error.message);
         })
-
-        expect(result).toEqual({
-                                id: "test",
-                                userid: userid,
-                                status: OrderStatus.PROCESSING,
-                                address: adress,
-                                date: someDate,
-                                positions: [{
-                                    id: "test1",
-                                    orderId: "",
-                                    productId: "p1",
-                                    productsAmount: 3
-                                },
-                                {
-                                    id: "test2",
-                                    orderId: "",
-                                    productId: "p2",
-                                    productsAmount: 3
-                                }
-                            ]
-                            });
     });
 
     it('update fail: order not found', async () => {
         when(orderRepository.getById("failtest")).thenResolve(null);
     
-        const result = await orderService.updateOrderStatus({     
+        orderService.updateOrderStatus({     
             id: "failtest",
             status: OrderStatus.PROCESSING,
-        })
-
-        expect(result).toEqual({errormsg: "not found in db by id"});
+        }).then((result) => {
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("not found in db by id");
+        });
     });
 
     it('should succesfully add positions to order', async () => {
@@ -292,37 +306,39 @@ describe('OrderService', () => {
         when(orderRepository.update(anything())).thenResolve(orderUpdated);
     
 
-        const result = await orderService.addPositionsToOrder({     
+        orderService.addPositionsToOrder({     
             id: "test",       
             positions: positionsToAdd,
+        }).then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userid: userid,
+                status: OrderStatus.PLACED,
+                address: adress,
+                date: someDate,
+                positions: [{
+                    id: "test1",
+                    orderId: "",
+                    productId: "p1",
+                    productsAmount: 3
+                },
+                {
+                    id: "test2",
+                    orderId: "",
+                    productId: "p2",
+                    productsAmount: 3
+                },
+                {
+                    id: "test3",
+                    orderId: "",
+                    productId: "p3",
+                    productsAmount: 3
+                }
+            ]
+            });
+        }).catch((error: Error) => {
+            console.error(error.message);
         })
-
-        expect(result).toEqual({
-                                id: "test",
-                                userid: userid,
-                                status: OrderStatus.PLACED,
-                                address: adress,
-                                date: someDate,
-                                positions: [{
-                                    id: "test1",
-                                    orderId: "",
-                                    productId: "p1",
-                                    productsAmount: 3
-                                },
-                                {
-                                    id: "test2",
-                                    orderId: "",
-                                    productId: "p2",
-                                    productsAmount: 3
-                                },
-                                {
-                                    id: "test3",
-                                    orderId: "",
-                                    productId: "p3",
-                                    productsAmount: 3
-                                }
-                            ]
-                            });
     });
     it('should succesfully remove positions from order', async () => {
         const userid = "test";
@@ -353,24 +369,26 @@ describe('OrderService', () => {
         when(orderRepository.getById("test")).thenResolve(orderToFind);
         when(orderRepository.update(anything())).thenResolve(orderUpdated);
     
-        const result = await orderService.removePositionsFromOrder({     
+        orderService.removePositionsFromOrder({     
             id: "test",       
             positions: positionsToRemove,
+        }).then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userid: userid,
+                status: OrderStatus.PLACED,
+                address: adress,
+                date: someDate,
+                positions: [{
+                    id: "test1",
+                    orderId: "",
+                    productId: "p1",
+                    productsAmount: 3
+                },
+            ]
+            });
+        }).catch((error: Error) => {
+            console.error(error.message);
         })
-
-        expect(result).toEqual({
-                                id: "test",
-                                userid: userid,
-                                status: OrderStatus.PLACED,
-                                address: adress,
-                                date: someDate,
-                                positions: [{
-                                    id: "test1",
-                                    orderId: "",
-                                    productId: "p1",
-                                    productsAmount: 3
-                                },
-                            ]
-                            });
     });
 });

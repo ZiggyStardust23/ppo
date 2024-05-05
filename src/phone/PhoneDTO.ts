@@ -44,6 +44,4 @@ type returnPhoneDTO = {
     price: number
 }
 
-type phoneServiceError = {errormsg: string};
-
-export { phoneFullDTO, phoneCreateDTO, phoneSearchDTO, returnPhoneDTO, phoneServiceError }
+export { phoneFullDTO, phoneCreateDTO, phoneSearchDTO, returnPhoneDTO }

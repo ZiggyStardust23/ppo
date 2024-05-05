@@ -1,14 +1,14 @@
 import { IOrderRepository } from './OrderRepository';
 import { Order, OrderStatus, OrderPosition } from './OrderModel';
-import { orderCreateDTO, orderServiceError, orderUpdatePositions, orderUpdateStatus, returnOrderDTO } from './OrderDTO';
+import { orderCreateDTO, orderUpdatePositions, orderUpdateStatus, returnOrderDTO } from './OrderDTO';
 
 export interface IOrderService {
     create(order: orderCreateDTO): Promise<returnOrderDTO>;
-    findById(orderId: string): Promise<returnOrderDTO | orderServiceError>;
-    findByUserId(userid: string): Promise<returnOrderDTO[] | orderServiceError>;
-    updateOrderStatus(order: orderUpdateStatus): Promise<returnOrderDTO | orderServiceError>;
-    addPositionsToOrder(order: orderUpdatePositions): Promise<returnOrderDTO | orderServiceError>;
-    removePositionsFromOrder(order: orderUpdatePositions): Promise<returnOrderDTO | orderServiceError>;
+    findById(orderId: string): Promise<returnOrderDTO | Error>;
+    findByUserId(userid: string): Promise<returnOrderDTO[] | Error>;
+    updateOrderStatus(order: orderUpdateStatus): Promise<returnOrderDTO | Error>;
+    addPositionsToOrder(order: orderUpdatePositions): Promise<returnOrderDTO | Error>;
+    removePositionsFromOrder(order: orderUpdatePositions): Promise<returnOrderDTO | Error>;
 }
 
 export class OrderService implements IOrderService {
@@ -33,18 +33,18 @@ export class OrderService implements IOrderService {
         return Promise.resolve(orderCreated.toDTO());
     }
 
-    async findById(orderId: string): Promise<returnOrderDTO | orderServiceError> {
+    async findById(orderId: string): Promise<returnOrderDTO | Error> {
         const orderGetted = await this.orderRepository.getById(orderId);
         if (orderGetted == null){
-            return Promise.resolve({errormsg: "not found in db by id"});
+            return Promise.reject(new Error("not found in db by id"));
         }
         return Promise.resolve(orderGetted.toDTO());
     }
 
-    async findByUserId(userid: string): Promise<returnOrderDTO[] | orderServiceError> {
+    async findByUserId(userid: string): Promise<returnOrderDTO[] | Error> {
         const ordersGetted = await this.orderRepository.getByUserId(userid);
         if (ordersGetted.length == 0){
-            return Promise.resolve({errormsg: "not found in db by id"});
+            return Promise.reject(new Error("not found in db by id"));
         }
         const ordersToReturn: returnOrderDTO[] = [];
         for (let order of ordersGetted){
@@ -53,25 +53,25 @@ export class OrderService implements IOrderService {
         return Promise.resolve(ordersToReturn);
     }
 
-    async updateOrderStatus(order: orderUpdateStatus): Promise<returnOrderDTO | orderServiceError> {
+    async updateOrderStatus(order: orderUpdateStatus): Promise<returnOrderDTO | Error> {
         const checkOrder = await this.orderRepository.getById(order.id);
         if (checkOrder == null){
-            return Promise.resolve({errormsg: "not found in db by id"});
+            return Promise.resolve(new Error("not found in db by id"));
         }
         
         checkOrder.status = order.status;
         const orderUpdated = await this.orderRepository.update(checkOrder);
         if (orderUpdated == null){
-            return Promise.resolve({errormsg: "order found, but error occured"});
+            return Promise.reject(new Error("order found, but error occured"));
         }
 
         return orderUpdated.toDTO();
     }
 
-    async addPositionsToOrder(order: orderUpdatePositions): Promise<returnOrderDTO | orderServiceError> {
+    async addPositionsToOrder(order: orderUpdatePositions): Promise<returnOrderDTO | Error> {
         const checkOrder = await this.orderRepository.getById(order.id);
         if (checkOrder == null){
-            return Promise.resolve({errormsg: "not found in db by id"});
+            return Promise.reject(new Error("not found in db by id"));
         }
         //Чтобы одинаковые позиции не попадали в order
         let filteredPositions = order.positions.filter(function(pos) {
@@ -88,15 +88,15 @@ export class OrderService implements IOrderService {
         
         const orderUpdated =  await this.orderRepository.update(checkOrder);
         if (orderUpdated == null){
-            return Promise.resolve({errormsg: "order found, but error occured"});
+            return Promise.reject(new Error("order found, but error occured"));
         }
         return orderUpdated.toDTO();
     }
 
-    async removePositionsFromOrder(order: orderUpdatePositions): Promise<returnOrderDTO | orderServiceError> {
+    async removePositionsFromOrder(order: orderUpdatePositions): Promise<returnOrderDTO | Error> {
         const checkOrder = await this.orderRepository.getById(order.id);
         if (checkOrder == null){
-            return Promise.resolve({errormsg: "not found in db by id"});
+            return Promise.reject(new Error("not found in db by id"));
         }
         checkOrder.positions = checkOrder.positions.filter(function(pos) {
             for (let delPos of order.positions){
@@ -109,7 +109,7 @@ export class OrderService implements IOrderService {
 
         const orderUpdated =  await this.orderRepository.update(checkOrder);
         if (orderUpdated == null){
-            return Promise.resolve({errormsg: "order found, but error occured"});
+            return Promise.reject(new Error("order found, but error occured"));
         }
         return orderUpdated.toDTO();
     }

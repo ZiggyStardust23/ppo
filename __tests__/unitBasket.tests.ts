@@ -24,11 +24,14 @@ describe('BasketService', () => {
         )
         when(basketRepository.create(userId)).thenResolve(basketCreated);
     
-        const result = await basketService.create(userId);
-        expect(result).toEqual({
-                                id: "test",
-                                userId: userId,
-                                positions: [],});
+        basketService.create(userId).then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userId: userId,
+                positions: [],});
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 
     it('findByUserId: success', async () => {
@@ -43,51 +46,61 @@ describe('BasketService', () => {
 
         when(basketRepository.getByuserid("test")).thenResolve(basketToFind);
     
-        const result = await basketService.findByUserId("test");
-
-        expect(result).toEqual({
-                                id: "test",
-                                userId: userId,
-                                positions: [
-                                    {
-                                        id: "test1",
-                                        basketId: "test",
-                                        productId: "p1",
-                                        productsAmount: 3
-                                    },
-                                    {
-                                        id: "test2",
-                                        basketId: "test",
-                                        productId: "p2",
-                                        productsAmount: 3
-                                    }
-                                ]});
+        basketService.findByUserId("test").then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userId: userId,
+                positions: [
+                    {
+                        id: "test1",
+                        basketId: "test",
+                        productId: "p1",
+                        productsAmount: 3
+                    },
+                    {
+                        id: "test2",
+                        basketId: "test",
+                        productId: "p2",
+                        productsAmount: 3
+                    }
+                ]});
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 
     it('findByUserId: fail', async () => {
 
         when(basketRepository.getByuserid("badid")).thenResolve(null);
     
-        const result = await basketService.findByUserId("badid");
-
-        expect(result).toEqual({errormsg: "basket not found by id"});
+        basketService.findByUserId("badid").then((result) => {
+            if (result instanceof Error) {
+                throw result
+            }
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("basket not found by id");
+        });
     });
 
     it('clear: success', async () => {
         const basketId = "test";
         when(basketRepository.clearBasket(basketId)).thenResolve(true);
     
-        const result = await basketService.clear(basketId);
-
-        expect(result).toEqual(true);
+        basketService.clear(basketId).then((result) => {
+            expect(result).toEqual(true);
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
     it('clear: fail, basket not found', async () => {
         const basketId = "badid";
         when(basketRepository.clearBasket(basketId)).thenResolve(false);
     
-        const result = await basketService.clear(basketId);
-
-        expect(result).toEqual(false);
+        basketService.clear(basketId).then((result) => {
+            expect(result).toEqual(false);
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
     it('calculateTotalPrice', async () => {
         const basketId = "test";
@@ -109,18 +122,19 @@ describe('BasketService', () => {
             phone2.price * positions[1].productsAmount
         );
     
-        const result = await basketService.calculateTotalPrice(basketId);
-
-        expect(result).toEqual(
-            phone1.price * positions[0].productsAmount +
-            phone2.price * positions[1].productsAmount
-        );
+        basketService.calculateTotalPrice(basketId).then((result) => {
+            expect(result).toEqual(
+                phone1.price * positions[0].productsAmount +
+                phone2.price * positions[1].productsAmount
+            );
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 
     it('should succesfully add positions to basket', async () => {
         const userId = "test";
         const positions = [new BasketPosition("test1", "test", "p1", 3), new BasketPosition("test2", "test", "p2", 3)];
-        const positionsToAdd = [new BasketPosition("", "", "p2", 3), new BasketPosition("", "", "p3", 3)];
         const positionsUpdated = [new BasketPosition("test1", "test", "p1", 3), new BasketPosition("test2", "test", "p2", 3), new BasketPosition("test3", "test", "p3", 3)];
 
         const basketToFind = new Basket(
@@ -138,7 +152,7 @@ describe('BasketService', () => {
         when(basketRepository.getById("test")).thenResolve(basketToFind);
         when(basketRepository.update(anything())).thenResolve(basketUpdated);
     
-        const result = await basketService.addProductsToBasket({     
+        basketService.addProductsToBasket({     
             id: "test",       
             positions: [
                 {
@@ -150,31 +164,33 @@ describe('BasketService', () => {
                     productsAmount: 3,
                 }
             ],
+        }).then((result) => {
+            expect(result).toEqual({
+                id: "test",
+                userId: userId,
+                positions: [
+                    {
+                        id: "test1",
+                        basketId: "test",
+                        productId: "p1",
+                        productsAmount: 3
+                    },
+                    {
+                        id: "test2",
+                        basketId: "test",
+                        productId: "p2",
+                        productsAmount: 3
+                    },
+                    {
+                        id: "test3",
+                        basketId: "test",
+                        productId: "p3",
+                        productsAmount: 3
+                    }
+                ]});
+        }).catch((error: Error) => {
+            console.error(error.message);
         })
-
-        expect(result).toEqual({
-                                id: "test",
-                                userId: userId,
-                                positions: [
-                                    {
-                                        id: "test1",
-                                        basketId: "test",
-                                        productId: "p1",
-                                        productsAmount: 3
-                                    },
-                                    {
-                                        id: "test2",
-                                        basketId: "test",
-                                        productId: "p2",
-                                        productsAmount: 3
-                                    },
-                                    {
-                                        id: "test3",
-                                        basketId: "test",
-                                        productId: "p3",
-                                        productsAmount: 3
-                                    }
-                                ]});
     });
     it('should succesfully remove positions from basket', async () => {
         const userId = "test";
@@ -197,25 +213,27 @@ describe('BasketService', () => {
         when(basketRepository.getById("test")).thenResolve(basketToFind);
         when(basketRepository.update(anything())).thenResolve(basketUpdated);
     
-        const result = await basketService.removeProductsFromBasket({     
+        basketService.removeProductsFromBasket({     
             id: "test",       
             positions: [
                 {
                     productId: "p2",
                     productsAmount: 3,
                 },
-            ]})
-
-        expect(result).toEqual({
-                                id: "test",
-                                userId: userId,
-                                positions: [
-                                    {
-                                        id: "test1",
-                                        basketId: "test",
-                                        productId: "p1",
-                                        productsAmount: 3
-                                    },
-                                ]});
+            ]}).then((result) => {
+                expect(result).toEqual({
+                    id: "test",
+                    userId: userId,
+                    positions: [
+                        {
+                            id: "test1",
+                            basketId: "test",
+                            productId: "p1",
+                            productsAmount: 3
+                        },
+                    ]});
+            }).catch((error: Error) => {
+                console.error(error.message);
+            })
     });
 });

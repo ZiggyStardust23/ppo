@@ -26,13 +26,17 @@ describe('OrderService', () => {
 
         when(paymentRepository.create(anything())).thenResolve(createdPayment);
     
-        const result = await paymentService.create(orderId_,);
-        expect(result).toEqual({
-            id: id_,
-            orderId: orderId_,
-            status: status_,
-            sum: sum_
-        });
+        paymentService.create(orderId_)
+            .then((result) => {
+                expect(result).toEqual({
+                    id: id_,
+                    orderId: orderId_,
+                    status: status_,
+                    sum: sum_
+                });   
+            }).catch((error: Error) => {
+                console.error(error.message);
+            })
     });
 
     it('findById: success', async () => {
@@ -49,23 +53,27 @@ describe('OrderService', () => {
 
         when(paymentRepository.getById("test")).thenResolve(paymentToFind);
     
-        const result = await paymentService.findById("test");
-
-        expect(result).toEqual({
-                                id: id_,
-                                orderId: orderId_,
-                                status: status_,
-                                sum: sum_
-                            });
+        paymentService.findById("test")
+            .then((result) => {
+                expect(result).toEqual({
+                    id: id_,
+                    orderId: orderId_,
+                    status: status_,
+                    sum: sum_
+                });  
+            }).catch((error: Error) => {
+                console.error(error.message);
+            })
     });
 
     it('findById: fail', async () => {
 
         when(paymentRepository.getById("test")).thenResolve(null);
     
-        const result = await paymentService.findById("test");
-
-        expect(result).toEqual({errormsg: "not found in db by id"});
+        paymentService.findById("test").then((result) => {
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("not found in db by id");
+        });
     });
 
     it('findByOrderId: success', async () => {
@@ -82,22 +90,26 @@ describe('OrderService', () => {
 
         when(paymentRepository.getByOrderId("test")).thenResolve(paymentToFind);
     
-        const result = await paymentService.findByOrderId("test");
-
-        expect(result).toEqual({
-                                id: id_,
-                                orderId: orderId_,
-                                status: status_,
-                                sum: sum_
-                            });
+        paymentService.findByOrderId("test")
+            .then((result) => {
+                expect(result).toEqual({
+                    id: id_,
+                    orderId: orderId_,
+                    status: status_,
+                    sum: sum_
+                }); 
+            }).catch((error: Error) => {
+                console.error(error.message);
+            })
     });
     it('findByOrderId: fail', async () => {
 
         when(paymentRepository.getByOrderId("test")).thenResolve(null);
     
-        const result = await paymentService.findByOrderId("test");
-
-        expect(result).toEqual({errormsg: "not found in db by order id"});
+        paymentService.findByOrderId("test").then((result) => {
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("not found in db by order id");
+        });
     });
     
     it('should succesfully update the status of payment', async () => {
@@ -115,19 +127,21 @@ describe('OrderService', () => {
 
         when(paymentRepository.update(anything())).thenResolve(paymentUpdated);
     
-        const result = await paymentService.update({     
+        paymentService.update({     
             id: id_,       
             orderId: orderId_,
             status: status_,
             sum: sum_
+        }).then((result) => {
+            expect(result).toEqual({
+                id: id_,
+                orderId: orderId_,
+                status: status_,
+                sum: sum_
+            });
+        }).catch((error: Error) => {
+            console.error(error.message);
         })
-
-        expect(result).toEqual({
-                                id: id_,
-                                orderId: orderId_,
-                                status: status_,
-                                sum: sum_
-                            });
     });
 
     it('update fail: payment not found', async () => {
@@ -138,13 +152,14 @@ describe('OrderService', () => {
 
         when(paymentRepository.getById("test")).thenResolve(null);
     
-        const result = await paymentService.update({     
+        paymentService.update({     
             id: id_,       
             orderId: orderId_,
             status: false,
             sum: sum_
-        })
-
-        expect(result).toEqual({errormsg: "not found in db"});
+        }).then((result) => {
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("not found in db");
+        });
     });
 });

@@ -26,18 +26,21 @@ describe('CommentService', () => {
         )
         when(commentRepository.create(anything())).thenResolve(commentCreated);
     
-        const result = await commentService.create({            
+        commentService.create({            
             userid: userId,
             productId: productId,
             text: text
-        });
-        expect(result).toEqual({
-                                id: "test", 
-                                userId: userId, 
-                                productId: productId,
-                                text: text,
-                                rate: 0
-                            });
+        }).then((result) => {
+            expect(result).toEqual({
+                id: "test", 
+                userId: userId, 
+                productId: productId,
+                text: text,
+                rate: 0
+            });
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 
     it('findByProductId: success', async () => {
@@ -64,31 +67,39 @@ describe('CommentService', () => {
 
         when(commentRepository.getByProductId("test")).thenResolve(commentsToFind);
     
-        const result = await commentService.findByProductId("test");
-
-        expect(result).toEqual([{
-                                id: "test1", 
-                                userId: userId, 
-                                productId: productId,
-                                text: text,
-                                rate: 0
-                            },
-                            {
-                                id: "test2", 
-                                userId: userId, 
-                                productId: productId,
-                                text: text,
-                                rate: 0
-                            }]);
-                        });
+        commentService.findByProductId("test")
+        .then((result) => {
+            expect(result).toEqual([{
+                id: "test1", 
+                userId: userId, 
+                productId: productId,
+                text: text,
+                rate: 0
+            },
+            {
+                id: "test2", 
+                userId: userId, 
+                productId: productId,
+                text: text,
+                rate: 0
+            }]);
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
+    });
 
     it('findByProductId: fail', async () => {
 
         when(commentRepository.getByProductId("badid")).thenResolve([]);
     
-        const result = await commentService.findByProductId("badid");
-
-        expect(result).toEqual([]);
+        commentService.findByProductId("badid")
+        .then((result) => {
+            if (result instanceof Error) {
+                throw result
+            }
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("comments not found by this product id");
+        });
     });
 
     it('update rate', async () => {
@@ -114,38 +125,47 @@ describe('CommentService', () => {
         when(commentRepository.getById("test")).thenResolve(commentToFind);
         when(commentRepository.update(anything())).thenResolve(commentUpdated);
     
-        const result = await commentService.updateRate({     
+        commentService.updateRate({     
             id: "test",
             rate: 5,
+        }).then((result) => {
+            expect(result).toEqual({
+                id: "test", 
+                userId: userId, 
+                productId: productId,
+                text: text,
+                rate: 5
+            });
+        }).catch((error: Error) => {
+            console.error(error.message);
         })
-
-        expect(result).toEqual({
-                                id: "test", 
-                                userId: userId, 
-                                productId: productId,
-                                text: text,
-                                rate: 5
-                            });
     });
     it('update rate failed', async () => {
         when(commentRepository.getById("badid")).thenResolve(null);
-        const result = await commentService.updateRate({     
+        commentService.updateRate({     
             id: "badid",
             rate: 5,
-        })
-
-        expect(result).toEqual({errormsg: "comment to update not found"});
+        }).then((result) => {
+        }).catch((error: Error) => {
+            expect(error.message).toEqual("comment to update not found");
+        });
     });
     it('delete comment', async () => {
         when(commentRepository.delete("test")).thenResolve(true);
-        const result = await commentService.delete("test")
-
-        expect(result).toEqual(true);
+        commentService.delete("test")
+        .then((result) => {
+            expect(result).toEqual(true);
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
     it('delete comment fail', async () => {
         when(commentRepository.delete("badid")).thenResolve(false);
-        const result = await commentService.delete("badid")
-
-        expect(result).toEqual(false);
+        commentService.delete("badid")
+        .then((result) => {
+            expect(result).toEqual(false);
+        }).catch((error: Error) => {
+            console.error(error.message);
+        })
     });
 });

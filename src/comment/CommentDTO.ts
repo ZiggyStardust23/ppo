@@ -9,10 +9,6 @@ type commentUpdateRateDTO = {
     rate: number
 }
 
-type commentServiceError = {
-    errormsg: string;
-}
-
 type returnCommentDTO = {
     id: string, 
     userId: string, 
@@ -21,4 +17,4 @@ type returnCommentDTO = {
     rate: number
 }
 
-export {commentCreateDTO, commentUpdateRateDTO, commentServiceError, returnCommentDTO}
+export {commentCreateDTO, commentUpdateRateDTO, returnCommentDTO}

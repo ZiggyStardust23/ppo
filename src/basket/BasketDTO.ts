@@ -26,8 +26,4 @@ type returnBasketPositionDTO = {
     productsAmount: number; 
 }
 
-type basketServiceError = {
-    errormsg: string;
-}
-
-export {updateBasketDTO, createBasketDTO, returnBasketDTO, basketPositionDTO, returnBasketPositionDTO, basketServiceError}
+export {updateBasketDTO, createBasketDTO, returnBasketDTO, basketPositionDTO, returnBasketPositionDTO}

@@ -1,12 +1,12 @@
-import { paymentServiceError, paymentUpdateDTO, returnPaymentDTO } from "./PaymentDTO";
+import { paymentUpdateDTO, returnPaymentDTO } from "./PaymentDTO";
 import { Payment } from "./PaymentModel";
 import { IPaymentRepository } from "./PaymentRepository";
 
 export interface IPaymentService {
     create(orderid: string): Promise<returnPaymentDTO>;
-    update(payment: paymentUpdateDTO): Promise<returnPaymentDTO | paymentServiceError>;
-    findById(paymentId: string): Promise<returnPaymentDTO | paymentServiceError>;
-    findByOrderId(orderId: string): Promise<returnPaymentDTO | paymentServiceError>;
+    update(payment: paymentUpdateDTO): Promise<returnPaymentDTO | Error>;
+    findById(paymentId: string): Promise<returnPaymentDTO | Error>;
+    findByOrderId(orderId: string): Promise<returnPaymentDTO | Error>;
 }
 
 export class PaymentService implements IPaymentService {
@@ -18,27 +18,27 @@ export class PaymentService implements IPaymentService {
         return paymentCreated.toDTO();
     }
     
-    public async update(payment: paymentUpdateDTO): Promise<returnPaymentDTO | paymentServiceError> {
+    public async update(payment: paymentUpdateDTO): Promise<returnPaymentDTO | Error> {
         const paymentToUpdate = new Payment(payment.id, payment.orderId, payment.status, payment.sum);
         const paymentUpdated = await  this.paymentRepository.update(paymentToUpdate);
         if (paymentUpdated == null){
-            return Promise.resolve({errormsg: "not found in db"});
+            return Promise.reject(new Error("not found in db"));
         }
         return Promise.resolve(paymentUpdated.toDTO())
     }
 
-    public async findById(paymentId: string): Promise<returnPaymentDTO | paymentServiceError> {
+    public async findById(paymentId: string): Promise<returnPaymentDTO | Error> {
         const paymentGetted = await this.paymentRepository.getById(paymentId);
         if (paymentGetted == null){
-            return Promise.resolve({errormsg: "not found in db by id"});
+            return Promise.reject(new Error("not found in db by id"));
         }
         return Promise.resolve(paymentGetted.toDTO())
     }
 
-    public async findByOrderId(orderId: string): Promise<returnPaymentDTO | paymentServiceError> {
+    public async findByOrderId(orderId: string): Promise<returnPaymentDTO | Error> {
         const paymentGetted = await this.paymentRepository.getByOrderId(orderId);
         if (paymentGetted == null){
-            return Promise.resolve({errormsg: "not found in db by order id"});
+            return Promise.reject(new Error("not found in db by order id"));
         }
         return Promise.resolve(paymentGetted.toDTO())
     }
