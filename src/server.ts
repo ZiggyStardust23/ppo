@@ -11,6 +11,8 @@ import {CommentService} from './comment/CommentService';
 import { PostgresCommentRepository } from './comment/CommentRepository';
 import {BasketService} from './basket/BasketService';
 import { PostgresBasketRepository } from './basket/BasketRepository';
+import { WishService } from "./wish/WishService";
+import { PostgresWishRepository } from "./wish/WishRepository";
 
 const app: Express = express();
 const PORT = 3000; // Выберите порт, который вы хотите прослушивать
@@ -31,7 +33,9 @@ const commentRep = new PostgresCommentRepository();
 const commentService = new CommentService(commentRep);
 const basketRep = new PostgresBasketRepository();
 const basketService = new BasketService(basketRep);
-
+const wishRep = new PostgresWishRepository();
+const wishService = new WishService(wishRep);
+wishRep.initialize();
 // Обработчик запросов
 app.get('/api/users/:id', async (req: Request, res: Response) => {
     const userId = req.params.id; // Получаем id пользователя из URL и преобразуем его в число
@@ -838,6 +842,40 @@ app.delete('/api/comments', async (req: Request, res: Response) => {
     }
 });
 
+app.post('/api/wishes', async (req: Request, res: Response) => {
+    const {userId, productId} = req.body;
+
+    try{
+        const wish = await wishService.create({userId, productId});
+        res.json(wish);
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
+app.get('/api/wishes', async (req: Request, res: Response) => {
+    const userId = req.query.userId as string;
+
+    try{
+        const wishes = await wishService.findByUserId(userId);
+        res.json(wishes);
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+app.delete('/api/wishes', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const result = await wishService.delete(id);
+        res.json(result);
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
 
 
 // Запуск сервера
