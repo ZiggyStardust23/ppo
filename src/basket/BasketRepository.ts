@@ -40,7 +40,7 @@ export class PostgresBasketRepository implements IBasketRepository {
                 await client.query(
                     `CREATE TABLE baskets (
                         id SERIAL PRIMARY KEY,
-                        userid VARCHAR(255) NOT NULL,
+                        userid SERIAL NOT NULL,
                         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                     )`
                 );
@@ -56,8 +56,8 @@ export class PostgresBasketRepository implements IBasketRepository {
                 await client.query(
                     `CREATE TABLE basketpositions (
                         id SERIAL PRIMARY KEY,
-                        basketid INT NOT NULL,
-                        phoneid INT NOT NULL,
+                        basketid SERIAL NOT NULL,
+                        phoneid SERIAL NOT NULL,
                         products_amount INT NOT NULL CHECK (products_amount > 0),
                         FOREIGN KEY (basketid) REFERENCES baskets(id),
                         FOREIGN KEY (phoneid) REFERENCES phones(id)

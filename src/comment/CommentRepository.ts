@@ -40,8 +40,8 @@ export class PostgresCommentRepository implements ICommentRepository {
                 await client.query(
                     `CREATE TABLE comments (
                         id SERIAL PRIMARY KEY,
-                        userid VARCHAR(255) NOT NULL,
-                        product_id VARCHAR(255) NOT NULL,
+                        userid SERIAL NOT NULL,
+                        product_id SERIAL NOT NULL,
                         text TEXT NOT NULL,
                         rate INT NOT NULL,
                         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -132,8 +132,8 @@ export class PostgresCommentRepository implements ICommentRepository {
         const client = await this.pool.connect();
         try {
             const result = await client.query(
-                `UPDATE comments SET userid = $1, product_id = $2, text = $3, rate = $4 WHERE id = $5 RETURNING *`,
-                [comment.userId, comment.productId, comment.text, comment.rate, comment.id]
+                `UPDATE comments SET text = $1, rate = $2 WHERE id = $3 RETURNING *`,
+                [comment.text, comment.rate, comment.id]
             );
             if (result.rows.length === 0) return null;
             const updatedComment = result.rows[0];

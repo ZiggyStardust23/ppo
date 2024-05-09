@@ -42,8 +42,8 @@ export class PostgresUserRepository implements IUserRepository {
                 await client.query(
                     `CREATE TABLE users (
                         id SERIAL PRIMARY KEY,
-                        name VARCHAR(255) NOT NULL,
-                        email VARCHAR(255) NOT NULL,
+                        name VARCHAR(64) NOT NULL,
+                        email VARCHAR(64) NOT NULL,
                         password TEXT NOT NULL,
                         phone_number VARCHAR(30) NOT NULL,
                         role INT NOT NULL CHECK (role >= 0 AND role <= 2),
