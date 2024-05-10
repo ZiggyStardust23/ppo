@@ -3,10 +3,10 @@ import { Pool } from 'pg';
 import * as conf from '../../config'
 
 export interface IPaymentRepository {
-    create(payment: Payment): Promise<Payment>;
-    getById(paymentId: string): Promise<Payment | null>;
-    getByOrderId(orderId: string): Promise<Payment | null>;
-    update(payment: Payment): Promise<Payment | null>;
+    create(payment: Payment, role: string): Promise<Payment>;
+    getById(paymentId: string, role: string): Promise<Payment | null>;
+    getByOrderId(orderId: string, role: string): Promise<Payment | null>;
+    update(payment: Payment, role: string): Promise<Payment | null>;
 }
 
 export class PostgresPaymentRepository implements IPaymentRepository {
@@ -56,8 +56,9 @@ export class PostgresPaymentRepository implements IPaymentRepository {
         }
     }
 
-    async create(payment: Payment): Promise<Payment> {
+    async create(payment: Payment, role: string): Promise<Payment> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');
     
@@ -98,8 +99,9 @@ export class PostgresPaymentRepository implements IPaymentRepository {
         }
     }
 
-    async getById(paymentId: string): Promise<Payment | null> {
+    async getById(paymentId: string, role: string): Promise<Payment | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(`SELECT * FROM payments WHERE id = $1`, [paymentId]);
             if (result.rows.length === 0) return null;
@@ -119,8 +121,9 @@ export class PostgresPaymentRepository implements IPaymentRepository {
         }
     }
 
-    async getByOrderId(orderId: string): Promise<Payment | null> {
+    async getByOrderId(orderId: string, role: string): Promise<Payment | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(`SELECT * FROM payments WHERE orderid = $1`, [orderId]);
             if (result.rows.length === 0) return null;
@@ -140,8 +143,9 @@ export class PostgresPaymentRepository implements IPaymentRepository {
         }
     }
 
-    async update(payment: Payment): Promise<Payment | null> {
+    async update(payment: Payment, role: string): Promise<Payment | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');
 

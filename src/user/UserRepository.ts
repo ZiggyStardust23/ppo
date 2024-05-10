@@ -4,12 +4,12 @@ import * as conf from '../../config'
 
 
 interface IUserRepository{
-    create(user: User): Promise<User>
-	update(user: User): Promise<User | null>
-	authenticate(login: string, password: string): Promise<User | null>
-	getByEmail(email: string): Promise<User | null>
-	getById(id: string): Promise<User | null>
-	delete(id: string): Promise<boolean>
+    create(user: User, role: string): Promise<User>
+	update(user: User, role: string): Promise<User | null>
+	authenticate(login: string, password: string, role: string): Promise<User | null>
+	getByEmail(email: string, role: string): Promise<User | null>
+	getById(id: string, role: string): Promise<User | null>
+	delete(id: string, role: string): Promise<boolean>
 }
 
 export class PostgresUserRepository implements IUserRepository {
@@ -62,8 +62,9 @@ export class PostgresUserRepository implements IUserRepository {
         }
     }
 
-    async create(user: User): Promise<User> {
+    async create(user: User, role: string): Promise<User> {
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             const result = await client.query<User>(
                 `INSERT INTO users (name, email, password, phone_number, role) 
                 VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -84,7 +85,7 @@ export class PostgresUserRepository implements IUserRepository {
             return userCreated;
     }
 
-    async update(user: User): Promise<User | null> {
+    async update(user: User, role: string): Promise<User | null> {
         try {
             // Проверка, что пользователь существует
             if (!user.id) {
@@ -92,6 +93,7 @@ export class PostgresUserRepository implements IUserRepository {
             }
 
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             const result = await client.query<User>(
                 `UPDATE users SET name = $1, email = $2, password = $3, phone_number = $4, role = $5, updated_at = CURRENT_TIMESTAMP 
                 WHERE id = $6 RETURNING *`,
@@ -120,7 +122,7 @@ export class PostgresUserRepository implements IUserRepository {
         }
     }
 
-    async authenticate(login: string, password: string): Promise<User | null> {
+    async authenticate(login: string, password: string, role: string): Promise<User | null> {
         try {
             // Валидация входных данных
             if (!login || !password) {
@@ -128,6 +130,7 @@ export class PostgresUserRepository implements IUserRepository {
             }
 
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             const result = await client.query<User>(
                 `SELECT * FROM users WHERE email = $1`,
                 [login]
@@ -153,7 +156,7 @@ export class PostgresUserRepository implements IUserRepository {
         }
     }
 
-    async getByEmail(email: string): Promise<User | null> {
+    async getByEmail(email: string, role: string): Promise<User | null> {
         try {
             // Валидация входных данных
             if (!email) {
@@ -161,6 +164,7 @@ export class PostgresUserRepository implements IUserRepository {
             }
 
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             const result = await client.query<User>(
                 `SELECT * FROM users WHERE email = $1`,
                 [email]
@@ -188,7 +192,7 @@ export class PostgresUserRepository implements IUserRepository {
         }
     }
 
-    async getById(id: string): Promise<User | null> {
+    async getById(id: string, role: string): Promise<User | null> {
         try {
             // Валидация входных данных
             if (!id) {
@@ -196,6 +200,7 @@ export class PostgresUserRepository implements IUserRepository {
             }
 
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             const result = await client.query<User>(
                 `SELECT * FROM users WHERE id = $1`,
                 [parseInt(id)]
@@ -222,7 +227,7 @@ export class PostgresUserRepository implements IUserRepository {
             return null;
         }
     }
-	async delete(id: string): Promise<boolean> {
+	async delete(id: string, role: string): Promise<boolean> {
         try {
             // Проверка, что ID пользователя указан
             if (!id) {
@@ -230,6 +235,7 @@ export class PostgresUserRepository implements IUserRepository {
             }
 
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             await client.query(
                 `DELETE FROM users WHERE id = $1`,
                 [id]

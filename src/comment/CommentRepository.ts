@@ -3,11 +3,11 @@ import { Pool } from 'pg';
 import * as conf from '../../config'
 
 export interface ICommentRepository {
-    create(comment: Comment): Promise<Comment>;
-    getByProductId(productId: string): Promise<Comment[]>;
-    getById(commentId: string): Promise<Comment | null>;
-    update(comment: Comment): Promise<Comment | null>;
-    delete(commentId: string): Promise<boolean>;
+    create(comment: Comment, role: string): Promise<Comment>;
+    getByProductId(productId: string, role: string): Promise<Comment[]>;
+    getById(commentId: string, role: string): Promise<Comment | null>;
+    update(comment: Comment, role: string): Promise<Comment | null>;
+    delete(commentId: string, role: string): Promise<boolean>;
 }
 
 export class PostgresCommentRepository implements ICommentRepository {
@@ -59,8 +59,9 @@ export class PostgresCommentRepository implements ICommentRepository {
         }
     }
 
-    async create(comment: Comment): Promise<Comment> {
+    async create(comment: Comment, role: string): Promise<Comment> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(
                 `INSERT INTO comments (userid, product_id, text, rate) VALUES ($1, $2, $3, $4) RETURNING *`,
@@ -82,8 +83,9 @@ export class PostgresCommentRepository implements ICommentRepository {
         }
     }
 
-    async getByProductId(productId: string): Promise<Comment[]> {
+    async getByProductId(productId: string, role: string): Promise<Comment[]> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(
                 `SELECT * FROM comments WHERE product_id = $1`,
@@ -104,8 +106,9 @@ export class PostgresCommentRepository implements ICommentRepository {
         }
     }
 
-    async getById(commentId: string): Promise<Comment | null> {
+    async getById(commentId: string, role: string): Promise<Comment | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(
                 `SELECT * FROM comments WHERE id = $1`,
@@ -128,8 +131,9 @@ export class PostgresCommentRepository implements ICommentRepository {
         }
     }
 
-    async update(comment: Comment): Promise<Comment | null> {
+    async update(comment: Comment, role: string): Promise<Comment | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(
                 `UPDATE comments SET text = $1, rate = $2 WHERE id = $3 RETURNING *`,
@@ -152,8 +156,9 @@ export class PostgresCommentRepository implements ICommentRepository {
         }
     }
 
-    async delete(commentId: string): Promise<boolean> {
+    async delete(commentId: string, role: string): Promise<boolean> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query(
                 `DELETE FROM comments WHERE id = $1`,

@@ -3,16 +3,16 @@ import { Comment } from "./CommentModel";
 import { ICommentRepository } from "./CommentRepository";
 
 export interface ICommentService {
-    create(comment: commentCreateDTO): Promise<returnCommentDTO>;
-    findByProductId(productId: string): Promise<returnCommentDTO[] | Error>;
-    updateRate(comment: commentUpdateRateDTO): Promise<returnCommentDTO | Error>;
-    delete(commentId: string): Promise<boolean>;
+    create(comment: commentCreateDTO, role: string): Promise<returnCommentDTO>;
+    findByProductId(productId: string, role: string): Promise<returnCommentDTO[] | Error>;
+    updateRate(comment: commentUpdateRateDTO, role: string): Promise<returnCommentDTO | Error>;
+    delete(commentId: string, role: string): Promise<boolean>;
 }
 
 export class CommentService implements ICommentService {
     constructor(private commentRepository: ICommentRepository) {}
 
-    public async create(comment: commentCreateDTO): Promise<returnCommentDTO> {
+    public async create(comment: commentCreateDTO, role: string): Promise<returnCommentDTO> {
         const commentToCreate = new Comment(
             "",
             comment.userid,
@@ -20,12 +20,12 @@ export class CommentService implements ICommentService {
             comment.text,
             0
         );
-        const commentCreated = await this.commentRepository.create(commentToCreate);
+        const commentCreated = await this.commentRepository.create(commentToCreate, role);
         return Promise.resolve(commentCreated.toDTO());
     }
 
-    public async findByProductId(productId: string): Promise<returnCommentDTO[] | Error> {
-        const productsGetted = await this.commentRepository.getByProductId(productId);
+    public async findByProductId(productId: string, role: string): Promise<returnCommentDTO[] | Error> {
+        const productsGetted = await this.commentRepository.getByProductId(productId, role);
         if (productsGetted.length == 0){
             return Promise.reject(new Error("comments not found by this product id"));
         }
@@ -36,20 +36,20 @@ export class CommentService implements ICommentService {
         return Promise.resolve(productsDTOToReturn);
     }
 
-    public async updateRate(comment: commentUpdateRateDTO): Promise<returnCommentDTO | Error> {
-        const checkComment = await this.commentRepository.getById(comment.id);
+    public async updateRate(comment: commentUpdateRateDTO, role: string): Promise<returnCommentDTO | Error> {
+        const checkComment = await this.commentRepository.getById(comment.id, role);
         if (!checkComment) {
             return Promise.reject(new Error("comment to update not found"));
         }
         checkComment.rate = comment.rate;
-        const commentUpdated = await this.commentRepository.update(checkComment);
+        const commentUpdated = await this.commentRepository.update(checkComment, role);
         if (!commentUpdated) {
             return Promise.reject(new Error("comment found but error occured"));
         }
         return Promise.resolve(commentUpdated.toDTO());
     }
 
-    public async delete(commentId: string): Promise<boolean> {
-        return this.commentRepository.delete(commentId);
+    public async delete(commentId: string, role: string): Promise<boolean> {
+        return this.commentRepository.delete(commentId, role);
     }
 }

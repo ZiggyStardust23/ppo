@@ -5,10 +5,10 @@ import { QueryResult, Pool } from 'pg';
 import * as conf from '../../config'
 
 export interface IPhoneRepository {
-    getById(id: string): Promise<Phone | null>;
-    paginate(props: Partial<phoneFullDTO>, pageNumber: number, pageSize: number): Promise<Phone[]>;
-    create(phone: Phone): Promise<Phone>;
-    update(phone: Phone): Promise<Phone | null>;
+    getById(id: string, role: string): Promise<Phone | null>;
+    paginate(props: Partial<phoneFullDTO>, pageNumber: number, pageSize: number, role: string): Promise<Phone[]>;
+    create(phone: Phone, role: string): Promise<Phone>;
+    update(phone: Phone, role: string): Promise<Phone | null>;
 }
 
 export class PostgresPhoneRepository implements IPhoneRepository {
@@ -171,8 +171,9 @@ export class PostgresPhoneRepository implements IPhoneRepository {
         }
     }
 
-    async create(phone: Phone): Promise<Phone> {
+    async create(phone: Phone, role: string): Promise<Phone> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
 
             const result = await client.query(
@@ -537,7 +538,7 @@ export class PostgresPhoneRepository implements IPhoneRepository {
     }
     
 
-    async update(phone: Phone): Promise<Phone | null> {
+    async update(phone: Phone, role: string): Promise<Phone | null> {
         try {
             // Проверка, что пользователь существует
             if (!phone.id) {
@@ -545,6 +546,7 @@ export class PostgresPhoneRepository implements IPhoneRepository {
             }
 
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             const result = await client.query(
                 `UPDATE phones 
                  SET 
@@ -914,7 +916,7 @@ export class PostgresPhoneRepository implements IPhoneRepository {
         }
     }
 
-    async getById(id: string): Promise<Phone | null> {
+    async getById(id: string, role: string): Promise<Phone | null> {
         try {
             // Валидация входных данных
             if (!id) {
@@ -922,6 +924,7 @@ export class PostgresPhoneRepository implements IPhoneRepository {
             }
 
             const client = await this.pool.connect();
+            await client.query(`SET ROLE ${role}`);
             const result = await client.query(
                 `SELECT * FROM phones WHERE id = $1`,
                 [parseInt(id)]
@@ -1057,7 +1060,7 @@ export class PostgresPhoneRepository implements IPhoneRepository {
             return null;
         }
     }
-	async paginate(props: phoneSearchDTO, pageNumber: number, pageSize: number): Promise<Phone[]> {
+	async paginate(props: phoneSearchDTO, pageNumber: number, pageSize: number, role: string): Promise<Phone[]> {
         const offset = (pageNumber - 1) * pageSize;
     
         let query = `SELECT * FROM phones`;
@@ -1130,6 +1133,7 @@ export class PostgresPhoneRepository implements IPhoneRepository {
         }
     
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result: QueryResult<Phone> = await client.query(query, values);
             return result.rows;

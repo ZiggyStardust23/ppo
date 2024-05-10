@@ -5,9 +5,9 @@ import { createDTO } from "./WishDTO";
 
 
 export interface IWishRepository{
-    create(wish: Wish): Promise<Wish | null>
-	getByUserId(userId: string): Promise<Wish[]>
-	delete(id: string): Promise<boolean>
+    create(wish: Wish, role: string): Promise<Wish | null>
+	getByUserId(userId: string, role: string): Promise<Wish[]>
+	delete(id: string, role: string): Promise<boolean>
 }
 
 export class PostgresWishRepository implements IWishRepository {
@@ -57,10 +57,10 @@ export class PostgresWishRepository implements IWishRepository {
         }
     }
 
-    async create(wish: Wish): Promise<Wish | null> {
+    async create(wish: Wish, role: string): Promise<Wish | null> {
         const client = await this.pool.connect();
         try {
-
+            await client.query(`SET ROLE ${role}`);
             const resultCheck = await client.query(
                 `SELECT * FROM wishes WHERE userid = $1 AND product_id = $2`,
                 [wish.userid, wish.productid]
@@ -88,8 +88,9 @@ export class PostgresWishRepository implements IWishRepository {
         }
     }
 
-    async getByUserId(userId: string): Promise<Wish[]> {
+    async getByUserId(userId: string, role: string): Promise<Wish[]> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(
                 `SELECT * FROM wishes WHERE userid = $1`,
@@ -108,8 +109,9 @@ export class PostgresWishRepository implements IWishRepository {
         }
     }
 
-    async delete(wishId: string): Promise<boolean> {
+    async delete(wishId: string, role: string): Promise<boolean> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query(
                 `DELETE FROM wishes WHERE id = $1`,

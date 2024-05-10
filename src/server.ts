@@ -13,9 +13,12 @@ import {BasketService} from './basket/BasketService';
 import { PostgresBasketRepository } from './basket/BasketRepository';
 import { WishService } from "./wish/WishService";
 import { PostgresWishRepository } from "./wish/WishRepository";
+import { Pool } from "pg";
+import * as conf from '../config'
 
 const app: Express = express();
 const PORT = 3000; // Выберите порт, который вы хотите прослушивать
+let role: string = "guest";
 
 // Middleware для парсинга JSON-тела запроса
 app.use(express.json());
@@ -36,13 +39,21 @@ const basketService = new BasketService(basketRep);
 const wishRep = new PostgresWishRepository();
 const wishService = new WishService(wishRep);
 wishRep.initialize();
+
+const pool = new Pool({
+        user: conf.user,
+        password: conf.password,
+        host: conf.host,
+        port: conf.port,
+        database: conf.database
+    });
 // Обработчик запросов
 app.get('/api/users/:id', async (req: Request, res: Response) => {
     const userId = req.params.id; // Получаем id пользователя из URL и преобразуем его в число
     // Поиск пользователя по id
     console.log(userId);
     try{
-        const user = await userService.findUserById(userId);
+        const user = await userService.findUserById(userId, role);
         res.json(user);
     }
     catch(e: any){
@@ -50,28 +61,29 @@ app.get('/api/users/:id', async (req: Request, res: Response) => {
     }
 });
 
-app.get('/api/users', async (req: Request, res: Response) => {
-    const userEmail = req.query.email as string;
-
-    // Поиск пользователя по email
-    try{
-        const user = await userService.findUserByEmail(userEmail);
-        res.json(user);
-    }
-    catch(e: any){
-        res.json(e);
-    }
-});
-
-app.post('/api/users/login', async (req: Request, res: Response) => {
+app.post('/api/users/login', async (req, res) => {
     const { email, password } = req.body;
 
-    try{
-        const user = await userService.login({email, password});
+    try {
+        const user = await userService.login({ email, password }, role);
+
+        if (user instanceof Error) {
+            throw user;
+        }
+
+        // Определите роль и пароль
+        if (user.role === 0) {
+            role = 'shop_admin';
+        } else if (user.role === 1) {
+            role = 'seller';
+        } else {
+            role = 'shop_user';
+        }
+
         res.json(user);
-    }
-    catch(e: any){
-        res.json(e);
+    } catch (error: any) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -79,7 +91,7 @@ app.post('/api/users/reg', async (req: Request, res: Response) => {
     const { email, name, phone_number, password } = req.body;
 
     try{
-        const user = await userService.registration({email, name, phone_number, password});
+        const user = await userService.registration({email, name, phone_number, password}, role);
         res.json(user);
     }
     catch(e: any){
@@ -87,11 +99,16 @@ app.post('/api/users/reg', async (req: Request, res: Response) => {
     }
 });
 
+app.post('/api/users/logout', async (req: Request, res: Response) => {
+    role = "guest";
+    res.json("logout");
+});
+
 app.post('/api/users/', async (req: Request, res: Response) => {
-    const { email, name, phone_number, password, role} = req.body;
+    const { email, name, phone_number, password, userrole} = req.body;
 
     try{
-        const user = await userService.createUser({email, name, phone_number, password, role});
+        const user = await userService.createUser({email, name, phone_number, password, role: userrole}, role);
         res.json(user);
     }
     catch(e: any){
@@ -100,10 +117,10 @@ app.post('/api/users/', async (req: Request, res: Response) => {
 });
 
 app.put('/api/users', async (req: Request, res: Response) => {
-    const { id, email, name, phone_number, password, role} = req.body;
+    const { id, email, name, phone_number, password, userrole} = req.body;
 
     try{
-        const user = await userService.updateUser({id, email, name, phone_number, password, role});
+        const user = await userService.updateUser({id, email, name, phone_number, password, role: userrole}, role);
         res.json(user);
     }
     catch(e: any){
@@ -115,7 +132,7 @@ app.get('/api/phones/:id', async (req: Request, res: Response) => {
     const phoneId = req.params.id; // Получаем id пользователя из URL и преобразуем его в число
     
     try{
-        const phone = await phoneService.findById(phoneId);
+        const phone = await phoneService.findById(phoneId, role);
         res.json(phone);
     }
     catch(e: any){
@@ -355,7 +372,7 @@ app.post('/api/phones/', async (req: Request, res: Response) => {
             package_contents,
             led_notification_indicator,
             additional_features,
-            dimensions_and_weight});
+            dimensions_and_weight}, role);
         res.json(phone);
     }
     catch(e: any){
@@ -596,7 +613,7 @@ app.put('/api/phones', async (req: Request, res: Response) => {
             package_contents,
             led_notification_indicator,
             additional_features,
-            dimensions_and_weight});
+            dimensions_and_weight}, role);
         res.json(phone);
     }
     catch(e: any){
@@ -608,7 +625,7 @@ app.post('/api/orders/', async (req: Request, res: Response) => {
     const { userid, address, positions} = req.body;
 
     try{
-        const order = await orderService.create({userid, address, positions});
+        const order = await orderService.create({userid, address, positions}, role);
         res.json(order);
     }
     catch(e: any){
@@ -619,7 +636,7 @@ app.post('/api/orders/', async (req: Request, res: Response) => {
 app.get('/api/orders/:id', async (req: Request, res: Response) => {
     const orderId = req.params.id;
     try{
-        const order = await orderService.findById(orderId);
+        const order = await orderService.findById(orderId, role);
         res.json(order);
     }
     catch(e: any){
@@ -631,7 +648,7 @@ app.get('/api/orders', async (req: Request, res: Response) => {
     const userId = req.query.userid as string;
 
     try{
-        const order = await orderService.findByUserId(userId);
+        const order = await orderService.findByUserId(userId, role);
         res.json(order);
     }
     catch(e: any){
@@ -643,7 +660,7 @@ app.put('/api/orders/status', async (req: Request, res: Response) => {
     const { id, status} = req.body;
 
     try{
-        const order = await orderService.updateOrderStatus({id, status});
+        const order = await orderService.updateOrderStatus({id, status}, role);
         res.json(order);
     }
     catch(e: any){
@@ -655,7 +672,7 @@ app.put('/api/orders/add', async (req: Request, res: Response) => {
     const { id, positions} = req.body;
 
     try{
-        const order = await orderService.addPositionsToOrder({id, positions});
+        const order = await orderService.addPositionsToOrder({id, positions}, role);
         res.json(order);
     }
     catch(e: any){
@@ -667,7 +684,7 @@ app.put('/api/orders/remove', async (req: Request, res: Response) => {
     const { id, positions} = req.body;
 
     try{
-        const order = await orderService.removePositionsFromOrder({id, positions});
+        const order = await orderService.removePositionsFromOrder({id, positions}, role);
         res.json(order);
     }
     catch(e: any){
@@ -678,7 +695,7 @@ app.put('/api/orders/remove', async (req: Request, res: Response) => {
 app.get('/api/payments/:id', async (req: Request, res: Response) => {
     const id = req.params.id;
     try{
-        const payment = await paymentService.findById(id);
+        const payment = await paymentService.findById(id, role);
         res.json(payment);
     }
     catch(e: any){
@@ -690,7 +707,7 @@ app.get('/api/payments', async (req: Request, res: Response) => {
     const orderId = req.query.orderId as string;
 
     try{
-        const payment = await paymentService.findByOrderId(orderId);
+        const payment = await paymentService.findByOrderId(orderId, role);
         res.json(payment);
     }
     catch(e: any){
@@ -702,7 +719,7 @@ app.post('/api/payments', async (req: Request, res: Response) => {
     const orderId = req.query.orderId as string;
 
     try{
-        const payment = await paymentService.create(orderId);
+        const payment = await paymentService.create(orderId, role);
         res.json(payment);
     }
     catch(e: any){
@@ -714,7 +731,7 @@ app.put('/api/payments', async (req: Request, res: Response) => {
     const { id, orderId, status, sum} = req.body;
 
     try{
-        const payment = await paymentService.update({id, orderId, status, sum});
+        const payment = await paymentService.update({id, orderId, status, sum}, role);
         res.json(payment);
     }
     catch(e: any){
@@ -726,7 +743,7 @@ app.post('/api/baskets', async (req: Request, res: Response) => {
     const userId = req.query.userid as string;
 
     try{
-        const order = await basketService.create(userId);
+        const order = await basketService.create(userId, role);
         res.json(order);
     }
     catch(e: any){
@@ -738,7 +755,7 @@ app.get('/api/baskets', async (req: Request, res: Response) => {
     const userId = req.query.userid as string;
 
     try{
-        const order = await basketService.findByUserId(userId);
+        const order = await basketService.findByUserId(userId, role);
         res.json(order);
     }
     catch(e: any){
@@ -750,7 +767,7 @@ app.post('/api/baskets/clear', async (req: Request, res: Response) => {
     const basketId = req.query.basketid as string;
 
     try{
-        const result = await basketService.clear(basketId);
+        const result = await basketService.clear(basketId, role);
         res.json(result)
     }
     catch(e: any){
@@ -762,7 +779,7 @@ app.get('/api/baskets/price', async (req: Request, res: Response) => {
     const basketId = req.query.basketid as string;
 
     try{
-        const sum = await basketService.calculateTotalPrice(basketId);
+        const sum = await basketService.calculateTotalPrice(basketId, role);
         res.json(sum);
     }
     catch(e: any){
@@ -774,7 +791,7 @@ app.put('/api/baskets/add', async (req: Request, res: Response) => {
     const {id, positions} = req.body;
 
     try{
-        const basket = await basketService.addProductsToBasket({id, positions});
+        const basket = await basketService.addProductsToBasket({id, positions}, role);
         res.json(basket);
     }
     catch(e: any){
@@ -786,7 +803,7 @@ app.put('/api/baskets/remove', async (req: Request, res: Response) => {
     const {id, positions} = req.body;
 
     try{
-        const basket = await basketService.removeProductsFromBasket({id, positions});
+        const basket = await basketService.removeProductsFromBasket({id, positions}, role);
         res.json(basket);
     }
     catch(e: any){
@@ -798,7 +815,7 @@ app.post('/api/comments', async (req: Request, res: Response) => {
     const {userid, productId, text} = req.body;
 
     try{
-        const comment = await commentService.create({userid, productId, text});
+        const comment = await commentService.create({userid, productId, text}, role);
         res.json(comment);
     }
     catch(e: any){
@@ -810,7 +827,7 @@ app.get('/api/comments', async (req: Request, res: Response) => {
     const productId = req.query.productId as string;
 
     try{
-        const comments = await commentService.findByProductId(productId);
+        const comments = await commentService.findByProductId(productId, role);
         res.json(comments);
     }
     catch(e: any){
@@ -822,7 +839,7 @@ app.put('/api/comments', async (req: Request, res: Response) => {
     const {id, rate} = req.body;
 
     try{
-        const comment = await commentService.updateRate({id, rate});
+        const comment = await commentService.updateRate({id, rate}, role);
         res.json(comment);
     }
     catch(e: any){
@@ -834,7 +851,7 @@ app.delete('/api/comments', async (req: Request, res: Response) => {
     const commentId = req.query.commentId as string;
 
     try{
-        const result = await commentService.delete(commentId);
+        const result = await commentService.delete(commentId, role);
         res.json(result);
     }
     catch(e: any){
@@ -846,7 +863,7 @@ app.post('/api/wishes', async (req: Request, res: Response) => {
     const {userId, productId} = req.body;
 
     try{
-        const wish = await wishService.create({userId, productId});
+        const wish = await wishService.create({userId, productId}, role);
         res.json(wish);
     }
     catch(e: any){
@@ -858,7 +875,7 @@ app.get('/api/wishes', async (req: Request, res: Response) => {
     const userId = req.query.userId as string;
 
     try{
-        const wishes = await wishService.findByUserId(userId);
+        const wishes = await wishService.findByUserId(userId, role);
         res.json(wishes);
     }
     catch(e: any){
@@ -869,7 +886,7 @@ app.delete('/api/wishes', async (req: Request, res: Response) => {
     const id = req.query.id as string;
 
     try{
-        const result = await wishService.delete(id);
+        const result = await wishService.delete(id, role);
         res.json(result);
     }
     catch(e: any){

@@ -3,40 +3,40 @@ import { Payment } from "./PaymentModel";
 import { IPaymentRepository } from "./PaymentRepository";
 
 export interface IPaymentService {
-    create(orderid: string): Promise<returnPaymentDTO>;
-    update(payment: paymentUpdateDTO): Promise<returnPaymentDTO | Error>;
-    findById(paymentId: string): Promise<returnPaymentDTO | Error>;
-    findByOrderId(orderId: string): Promise<returnPaymentDTO | Error>;
+    create(orderid: string, role: string): Promise<returnPaymentDTO>;
+    update(payment: paymentUpdateDTO, role: string): Promise<returnPaymentDTO | Error>;
+    findById(paymentId: string, role: string): Promise<returnPaymentDTO | Error>;
+    findByOrderId(orderId: string, role: string): Promise<returnPaymentDTO | Error>;
 }
 
 export class PaymentService implements IPaymentService {
     constructor(private paymentRepository: IPaymentRepository) {}
 
-    public async create(orderid: string): Promise<returnPaymentDTO> {
+    public async create(orderid: string, role: string): Promise<returnPaymentDTO> {
         const paymentToCreate = new Payment("", orderid, true, 0);
-        const paymentCreated = await this.paymentRepository.create(paymentToCreate);
+        const paymentCreated = await this.paymentRepository.create(paymentToCreate, role);
         return paymentCreated.toDTO();
     }
     
-    public async update(payment: paymentUpdateDTO): Promise<returnPaymentDTO | Error> {
+    public async update(payment: paymentUpdateDTO, role: string): Promise<returnPaymentDTO | Error> {
         const paymentToUpdate = new Payment(payment.id, payment.orderId, payment.status, payment.sum);
-        const paymentUpdated = await  this.paymentRepository.update(paymentToUpdate);
+        const paymentUpdated = await  this.paymentRepository.update(paymentToUpdate, role);
         if (paymentUpdated == null){
             return Promise.reject(new Error("not found in db"));
         }
         return Promise.resolve(paymentUpdated.toDTO())
     }
 
-    public async findById(paymentId: string): Promise<returnPaymentDTO | Error> {
-        const paymentGetted = await this.paymentRepository.getById(paymentId);
+    public async findById(paymentId: string, role: string): Promise<returnPaymentDTO | Error> {
+        const paymentGetted = await this.paymentRepository.getById(paymentId, role);
         if (paymentGetted == null){
             return Promise.reject(new Error("not found in db by id"));
         }
         return Promise.resolve(paymentGetted.toDTO())
     }
 
-    public async findByOrderId(orderId: string): Promise<returnPaymentDTO | Error> {
-        const paymentGetted = await this.paymentRepository.getByOrderId(orderId);
+    public async findByOrderId(orderId: string, role: string): Promise<returnPaymentDTO | Error> {
+        const paymentGetted = await this.paymentRepository.getByOrderId(orderId, role);
         if (paymentGetted == null){
             return Promise.reject(new Error("not found in db by order id"));
         }

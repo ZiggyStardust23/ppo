@@ -5,10 +5,10 @@ import { Pool } from 'pg';
 import * as conf from '../../config'
 
 export interface IOrderRepository {
-    create(order: Order): Promise<Order>;
-    getById(orderId: string): Promise<Order | null>;
-    getByUserId(userid: string): Promise<Order[]>;
-    update(order: Order): Promise<Order | null>;
+    create(order: Order, role: string): Promise<Order>;
+    getById(orderId: string, role: string): Promise<Order | null>;
+    getByUserId(userid: string, role: string): Promise<Order[]>;
+    update(order: Order, role: string): Promise<Order | null>;
 }
 
 export class PostgresOrderRepository implements IOrderRepository {
@@ -81,8 +81,9 @@ export class PostgresOrderRepository implements IOrderRepository {
         }
     }
 
-    async create(order: Order): Promise<Order> {
+    async create(order: Order, role: string): Promise<Order> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');
 
@@ -115,8 +116,9 @@ export class PostgresOrderRepository implements IOrderRepository {
         }
     }
 
-    async getById(orderId: string): Promise<Order | null> {
+    async getById(orderId: string, role: string): Promise<Order | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(`SELECT * FROM orders WHERE id = $1`, [orderId]);
             if (result.rows.length === 0) return null;
@@ -146,8 +148,9 @@ export class PostgresOrderRepository implements IOrderRepository {
         }
     }
 
-    async getByUserId(userid: string): Promise<Order[]> {
+    async getByUserId(userid: string, role: string): Promise<Order[]> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(`SELECT * FROM orders WHERE userid = $1`, [userid]);
             if (result.rows.length === 0) return [];
@@ -182,8 +185,9 @@ export class PostgresOrderRepository implements IOrderRepository {
         }
     }
 
-    async update(order: Order): Promise<Order | null> {
+    async update(order: Order, role: string): Promise<Order | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');
     

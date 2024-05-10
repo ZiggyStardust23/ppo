@@ -4,12 +4,12 @@ import { Pool } from 'pg';
 import * as conf from '../../config'
 
 export interface IBasketRepository {
-    create(userid: string): Promise<Basket>;
-    getByuserid(userid: string): Promise<Basket | null>;
-    getById(baskerId: string): Promise<Basket | null>
-    clearBasket(basketId: string): Promise<boolean>;
-    calculateTotalPrice(basketId: string): Promise<number>;
-    update(basket: Basket): Promise<Basket>;
+    create(userid: string, role: string): Promise<Basket>;
+    getByuserid(userid: string, role: string): Promise<Basket | null>;
+    getById(baskerId: string, role: string): Promise<Basket | null>
+    clearBasket(basketId: string, role: string): Promise<boolean>;
+    calculateTotalPrice(basketId: string, role: string): Promise<number>;
+    update(basket: Basket, role: string): Promise<Basket>;
 }
 
 export class PostgresBasketRepository implements IBasketRepository {
@@ -74,8 +74,9 @@ export class PostgresBasketRepository implements IBasketRepository {
         }
     }
 
-    async create(userid: string): Promise<Basket> {
+    async create(userid: string, role: string): Promise<Basket> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');
 
@@ -97,8 +98,9 @@ export class PostgresBasketRepository implements IBasketRepository {
         }
     }
 
-    async getByuserid(userid: string): Promise<Basket | null> {
+    async getByuserid(userid: string, role: string): Promise<Basket | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(`SELECT * FROM baskets WHERE userid = $1`, [userid]);
             if (result.rows.length === 0) return null;
@@ -125,8 +127,9 @@ export class PostgresBasketRepository implements IBasketRepository {
         }
     }
 
-    async getById(basketId: string): Promise<Basket | null> {
+    async getById(basketId: string, role: string): Promise<Basket | null> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(`SELECT * FROM baskets WHERE id = $1`, [basketId]);
             if (result.rows.length === 0) return null;
@@ -153,8 +156,9 @@ export class PostgresBasketRepository implements IBasketRepository {
         }
     }
 
-    async clearBasket(basketId: string): Promise<boolean> {
+    async clearBasket(basketId: string, role: string): Promise<boolean> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');
 
@@ -176,8 +180,9 @@ export class PostgresBasketRepository implements IBasketRepository {
         }
     }
 
-    async calculateTotalPrice(basketId: string): Promise<number> {
+    async calculateTotalPrice(basketId: string, role: string): Promise<number> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             const result = await client.query(
                 `SELECT SUM(products_amount * price) AS total_price 
@@ -196,8 +201,9 @@ export class PostgresBasketRepository implements IBasketRepository {
         }
     }
 
-    async update(basket: Basket): Promise<Basket> {
+    async update(basket: Basket, role: string): Promise<Basket> {
         const client = await this.pool.connect();
+        await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');
 
