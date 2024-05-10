@@ -232,3 +232,40 @@ dimensions_and_weight
     "additional_features": "IP68 Water and Dust Resistance, Stereo Speakers, Reverse Wireless Charging, Wireless DeX, Samsung Knox Security, Dolby Atmos",
     "dimensions_and_weight": "160.5 x 75.5 x 8.5 mm, 188 g"
 }
+
+CREATE OR REPLACE FUNCTION create_comment_on_payment_status_change()
+RETURNS TRIGGER AS $$
+DECLARE
+    user_id INT;
+    user_email TEXT;
+    position_rec RECORD;
+BEGIN
+    -- Получаем user_id из таблицы orders для данного orderid
+    SELECT userid INTO user_id FROM orders WHERE id = NEW.orderid;
+
+    -- Получаем email пользователя из таблицы users по user_id
+    SELECT email INTO user_email FROM users WHERE id = user_id;
+
+    -- Проверяем, изменилось ли поле status на true
+    IF NEW.status = true THEN
+        -- Находим product_id из таблицы positions для данного orderid
+        FOR position_rec IN 
+            SELECT productid FROM positions WHERE orderid = NEW.orderid
+        LOOP
+            -- Создаем комментарий для каждого product_id
+            INSERT INTO comments (userid, product_id, text, rate)
+            VALUES (user_id, position_rec.productid, 'Пользователь ' || user_email || ' купил этот товар', 0);
+        END LOOP;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER payment_status_trigger
+AFTER UPDATE OF status ON payments
+FOR EACH ROW
+EXECUTE FUNCTION create_comment_on_payment_status_change();
+
+GRANT USAGE ON SEQUENCE comments_id_seq TO shop_user;
+                        //payments

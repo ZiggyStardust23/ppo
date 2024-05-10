@@ -58,6 +58,7 @@ export class PostgresPaymentRepository implements IPaymentRepository {
 
     async create(payment: Payment, role: string): Promise<Payment> {
         const client = await this.pool.connect();
+        console.log(role);
         await client.query(`SET ROLE ${role}`);
         try {
             await client.query('BEGIN');

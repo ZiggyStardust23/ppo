@@ -61,6 +61,11 @@ app.get('/api/users/:id', async (req: Request, res: Response) => {
     }
 });
 
+app.post('/api/users/logout', async (req: Request, res: Response) => {
+    role = "guest";
+    res.json("logout");
+});
+
 app.post('/api/users/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -97,11 +102,6 @@ app.post('/api/users/reg', async (req: Request, res: Response) => {
     catch(e: any){
         res.json(e);
     }
-});
-
-app.post('/api/users/logout', async (req: Request, res: Response) => {
-    role = "guest";
-    res.json("logout");
 });
 
 app.post('/api/users/', async (req: Request, res: Response) => {
