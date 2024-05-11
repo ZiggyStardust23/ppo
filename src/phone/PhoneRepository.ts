@@ -1060,8 +1060,10 @@ export class PostgresPhoneRepository implements IPhoneRepository {
             return null;
         }
     }
-	async paginate(props: phoneSearchDTO, pageNumber: number, pageSize: number, role: string): Promise<Phone[]> {
+    async paginate(props: phoneSearchDTO, pageNumber: number, pageSize: number, role: string): Promise<Phone[]> {
         const offset = (pageNumber - 1) * pageSize;
+    
+        console.log(props, pageNumber, pageSize);
     
         let query = `SELECT * FROM phones`;
     
@@ -1074,51 +1076,51 @@ export class PostgresPhoneRepository implements IPhoneRepository {
         }
     
         if (props.producername) {
-            conditions.push(`producer_name ILIKE $${values.length + 1}`);
+            conditions.push(`producername ILIKE $${values.length + 1}`);
             values.push(`%${props.producername}%`);
         }
     
         if (props.osname) {
-            conditions.push(`os_name ILIKE $${values.length + 1}`);
+            conditions.push(`osname ILIKE $${values.length + 1}`);
             values.push(`%${props.osname}%`);
         }
     
-        if (props.minramsize != undefined) {
-            conditions.push(`ram_size >= $${values.length + 1}`);
+        if (props.minramsize !== undefined) {
+            conditions.push(`ramsize >= $${values.length + 1}`);
             values.push(props.minramsize);
         }
     
-        if (props.maxramsize != undefined) {
-            conditions.push(`ram_size <= $${values.length + 1}`);
+        if (props.maxramsize !== undefined) {
+            conditions.push(`ramsize <= $${values.length + 1}`);
             values.push(props.maxramsize);
         }
     
-        if (props.minmemsize != undefined) {
-            conditions.push(`mem_size >= $${values.length + 1}`);
+        if (props.minmemsize !== undefined) {
+            conditions.push(`memsize >= $${values.length + 1}`);
             values.push(props.minmemsize);
         }
     
-        if (props.maxmemsize != undefined) {
-            conditions.push(`mem_size <= $${values.length + 1}`);
+        if (props.maxmemsize !== undefined) {
+            conditions.push(`memsize <= $${values.length + 1}`);
             values.push(props.maxmemsize);
         }
     
-        if (props.mincamres != undefined) {
-            conditions.push(`cam_res >= $${values.length + 1}`);
+        if (props.mincamres !== undefined) {
+            conditions.push(`camres >= $${values.length + 1}`);
             values.push(props.mincamres);
         }
     
-        if (props.maxcamres != undefined) {
-            conditions.push(`cam_res <= $${values.length + 1}`);
+        if (props.maxcamres !== undefined) {
+            conditions.push(`camres <= $${values.length + 1}`);
             values.push(props.maxcamres);
         }
     
-        if (props.minPrice != undefined) {
+        if (props.minPrice !== undefined) {
             conditions.push(`price >= $${values.length + 1}`);
             values.push(props.minPrice);
         }
     
-        if (props.maxPrice != undefined) {
+        if (props.maxPrice !== undefined) {
             conditions.push(`price <= $${values.length + 1}`);
             values.push(props.maxPrice);
         }
@@ -1127,16 +1129,140 @@ export class PostgresPhoneRepository implements IPhoneRepository {
             query += ` WHERE ${conditions.join(' AND ')}`;
         }
     
-        if (offset != 0){
-            query += ` ORDER BY id OFFSET $${values.length + 1} LIMIT $${values.length + 2}`;
-            values.push(offset, pageSize);
+        query += ` ORDER BY id`;
+    
+        if (pageSize !== undefined) {
+            query += ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+            values.push(pageSize, offset);
         }
     
         const client = await this.pool.connect();
         await client.query(`SET ROLE ${role}`);
         try {
-            const result: QueryResult<Phone> = await client.query(query, values);
-            return result.rows;
+            const result = await client.query(query, values);
+            let phonesToRet: Phone[] = [];
+            for (let i = 0; i < result.rows.length; i++){
+                phonesToRet.push(
+                    new Phone(
+                        result.rows[i].id,
+                        result.rows[i].name,
+                        result.rows[i].producername,
+                        result.rows[i].osname,
+                        result.rows[i].ramsize,
+                        result.rows[i].memsize,
+                        result.rows[i].camres,
+                        result.rows[i].price,
+                        result.rows[i].warranty,
+                        result.rows[i].release_year,
+                        result.rows[i].type,
+                        result.rows[i].model,
+                        result.rows[i].producer_code,
+                        result.rows[i].back_panel_color,
+                        result.rows[i].edge_color,
+                        result.rows[i].manufacturer_declared_color,
+                        result.rows[i].frequencies_2g,
+                        result.rows[i].frequencies_3g,
+                        result.rows[i].lte_4g_support,
+                        result.rows[i].frequencies_4g_lte,
+                        result.rows[i].lte_advanced_support,
+                        result.rows[i].lte_advanced_speed_categories,
+                        result.rows[i].volte_support,
+                        result.rows[i].networks_5g_support,
+                        result.rows[i].frequencies_5g,
+                        result.rows[i].sim_card_format,
+                        result.rows[i].physical_sim_cards_count,
+                        result.rows[i].esim_count,
+                        result.rows[i].screen_size_inch,
+                        result.rows[i].screen_resolution,
+                        result.rows[i].screen_matrix_technology,
+                        result.rows[i].screen_matrix_type_detailed,
+                        result.rows[i].brightness,
+                        result.rows[i].screen_refresh_rate,
+                        result.rows[i].pixel_density,
+                        result.rows[i].aspect_ratio,
+                        result.rows[i].screen_colors_count,
+                        result.rows[i].body_type,
+                        result.rows[i].body_material,
+                        result.rows[i].ruggedness,
+                        result.rows[i].screen_protective_coating,
+                        result.rows[i].ip_rating,
+                        result.rows[i].screen_cutout_type,
+                        result.rows[i].os_version,
+                        result.rows[i].processor_model,
+                        result.rows[i].cores_count,
+                        result.rows[i].max_processor_frequency,
+                        result.rows[i].processor_configuration,
+                        result.rows[i].fabrication_process,
+                        result.rows[i].gpu,
+                        result.rows[i].ram_type,
+                        result.rows[i].ram_amount,
+                        result.rows[i].virtual_ram_extension,
+                        result.rows[i].internal_memory_amount,
+                        result.rows[i].memory_card_slot,
+                        result.rows[i].main_cameras_count,
+                        result.rows[i].main_camera_megapixels,
+                        result.rows[i].camera_modules_type,
+                        result.rows[i].main_camera_sensor_model,
+                        result.rows[i].main_camera_aperture,
+                        result.rows[i].main_camera_autofocus,
+                        result.rows[i].flash_type,
+                        result.rows[i].lens_field_of_view_angle,
+                        result.rows[i].optical_stabilization,
+                        result.rows[i].digital_zoom_photo,
+                        result.rows[i].optical_zoom_photo,
+                        result.rows[i].main_camera_resolution,
+                        result.rows[i].dxomark_rating_main_camera,
+                        result.rows[i].main_camera_features_technologies,
+                        result.rows[i].main_camera_shooting_modes_features,
+                        result.rows[i].video_shooting_format,
+                        result.rows[i].video_resolution_frame_rate,
+                        result.rows[i].slow_motion_video,
+                        result.rows[i].video_zoom,
+                        result.rows[i].video_playback_formats,
+                        result.rows[i].video_shooting_features_functions,
+                        result.rows[i].dual_front_camera,
+                        result.rows[i].front_camera_megapixels_count,
+                        result.rows[i].front_camera_aperture,
+                        result.rows[i].front_camera_autofocus,
+                        result.rows[i].built_in_flash,
+                        result.rows[i].front_camera_resolution,
+                        result.rows[i].dxomark_rating_selfie_camera,
+                        result.rows[i].front_camera_features_technologies,
+                        result.rows[i].front_camera_shooting_modes_features,
+                        result.rows[i].stereo_speakers,
+                        result.rows[i].audio_file_formats,
+                        result.rows[i].fm_radio,
+                        result.rows[i].bluetooth_version,
+                        result.rows[i].wifi_standard,
+                        result.rows[i].nfc,
+                        result.rows[i].navigation_systems,
+                        result.rows[i].ir_port,
+                        result.rows[i].other_data_transmission_technologies,
+                        result.rows[i].charging_interface,
+                        result.rows[i].headphone_jack,
+                        result.rows[i].otg_support,
+                        result.rows[i].sensors,
+                        result.rows[i].battery_type,
+                        result.rows[i].battery_capacity,
+                        result.rows[i].charger_voltage,
+                        result.rows[i].charger_output_power,
+                        result.rows[i].fast_charging,
+                        result.rows[i].fast_charging_standards,
+                        result.rows[i].wireless_charging_support,
+                        result.rows[i].reverse_wireless_charging_support,
+                        result.rows[i].music_playback_time,
+                        result.rows[i].video_playback_time,
+                        result.rows[i].biometric_protection,
+                        result.rows[i].headphones_included,
+                        result.rows[i].charger_included,
+                        result.rows[i].package_contents,
+                        result.rows[i].led_notification_indicator,
+                        result.rows[i].additional_features,
+                        result.rows[i].dimensions_and_weight
+                    )
+                )
+            }
+            return phonesToRet;
         } catch (error: any) {
             console.error('Ошибка при поиске телефонов:', error.message);
             return [];
@@ -1144,4 +1270,4 @@ export class PostgresPhoneRepository implements IPhoneRepository {
             client.release();
         }
     }
-}
+}    

@@ -77,10 +77,12 @@ app.post('/api/users/login', async (req, res) => {
         }
 
         // Определите роль и пароль
-        if (user.role === 0) {
+        if (user.role == 0) {
             role = 'shop_admin';
-        } else if (user.role === 1) {
+            console.log("admin login")
+        } else if (user.role == 1) {
             role = 'seller';
+            console.log("seller login")
         } else {
             role = 'shop_user';
         }
@@ -122,6 +124,30 @@ app.put('/api/users', async (req: Request, res: Response) => {
     try{
         const user = await userService.updateUser({id, email, name, phone_number, password, role: userrole}, role);
         res.json(user);
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
+app.delete('/api/users', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const client = await pool.connect();
+        await client.query(`SET ROLE ${role}`);
+        try {
+            await client.query(
+                `DELETE FROM users WHERE id = $1`,
+                [id]
+            );
+            res.json(true);;
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
     }
     catch(e: any){
         res.json(e);
@@ -621,6 +647,63 @@ app.put('/api/phones', async (req: Request, res: Response) => {
     }
 });
 
+app.post('/api/phones/paginate', async (req: Request, res: Response) => {
+    const { pageNumber, pageSize, minramsize,
+        maxramsize,
+        minmemsize,
+        maxmemsize,
+        mincamres,
+        maxcamres,
+        name,
+        producername,
+        osname,
+        minPrice,
+        maxPrice} = req.body;
+    try{
+        const phones = await phoneService.paginate({
+        minramsize,
+        maxramsize,
+        minmemsize,
+        maxmemsize,
+        mincamres,
+        maxcamres,
+        name,
+        producername,
+        osname,
+        minPrice,
+        maxPrice
+        }, pageNumber, pageSize, role);
+        res.json(phones);
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
+app.delete('/api/phones', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const client = await pool.connect();
+        await client.query(`SET ROLE ${role}`);
+        try {
+            await client.query(
+                `DELETE FROM phones WHERE id = $1`,
+                [id]
+            );
+            res.json(true);;
+        } catch (error) {
+            console.error('Error deleting phone:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
 app.post('/api/orders/', async (req: Request, res: Response) => {
     const { userid, address, positions} = req.body;
 
@@ -692,6 +775,54 @@ app.put('/api/orders/remove', async (req: Request, res: Response) => {
     }
 });
 
+app.delete('/api/orders', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const client = await pool.connect();
+        await client.query(`SET ROLE ${role}`);
+        try {
+            await client.query(
+                `DELETE FROM orders WHERE id = $1`,
+                [id]
+            );
+            res.json(true);;
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
+app.delete('/api/orders/rempos', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const client = await pool.connect();
+        await client.query(`SET ROLE ${role}`);
+        try {
+            await client.query(
+                `DELETE FROM positions WHERE id = $1`,
+                [id]
+            );
+            res.json(true);;
+        } catch (error) {
+            console.error('Error deleting position:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
 app.get('/api/payments/:id', async (req: Request, res: Response) => {
     const id = req.params.id;
     try{
@@ -733,6 +864,30 @@ app.put('/api/payments', async (req: Request, res: Response) => {
     try{
         const payment = await paymentService.update({id, orderId, status, sum}, role);
         res.json(payment);
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
+app.delete('/api/payments', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const client = await pool.connect();
+        await client.query(`SET ROLE ${role}`);
+        try {
+            await client.query(
+                `DELETE FROM payments WHERE id = $1`,
+                [id]
+            );
+            res.json(true);;
+        } catch (error) {
+            console.error('Error deleting payment:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
     }
     catch(e: any){
         res.json(e);
@@ -811,6 +966,54 @@ app.put('/api/baskets/remove', async (req: Request, res: Response) => {
     }
 });
 
+app.delete('/api/baskets', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const client = await pool.connect();
+        await client.query(`SET ROLE ${role}`);
+        try {
+            await client.query(
+                `DELETE FROM baskets WHERE id = $1`,
+                [id]
+            );
+            res.json(true);;
+        } catch (error) {
+            console.error('Error deleting basket:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
+app.delete('/api/baskets/rempos', async (req: Request, res: Response) => {
+    const id = req.query.id as string;
+
+    try{
+        const client = await pool.connect();
+        await client.query(`SET ROLE ${role}`);
+        try {
+            await client.query(
+                `DELETE FROM basketpositions WHERE id = $1`,
+                [id]
+            );
+            res.json(true);;
+        } catch (error) {
+            console.error('Error deleting position:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+    catch(e: any){
+        res.json(e);
+    }
+});
+
 app.post('/api/comments', async (req: Request, res: Response) => {
     const {userid, productId, text} = req.body;
 
@@ -822,6 +1025,8 @@ app.post('/api/comments', async (req: Request, res: Response) => {
         res.json(e);
     }
 });
+
+
 
 app.get('/api/comments', async (req: Request, res: Response) => {
     const productId = req.query.productId as string;

@@ -73,6 +73,7 @@ export class PostgresUserRepository implements IUserRepository {
 
             client.release();
 
+            console.log(result.rows[0]);
             let toParse = result.rows[0];
             let userCreated = new User(
                 toParse.id, 
