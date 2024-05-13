@@ -42,7 +42,7 @@ export class PostgresPaymentRepository implements IPaymentRepository {
                         sum INT NOT NULL CHECK (sum >= 0),
                         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (orderid) REFERENCES orders(id)
+                        FOREIGN KEY (orderid) REFERENCES orders(id) ON DELETE CASCADE
                     )`
                 );
                 console.log('Таблица платежей создана');

@@ -44,6 +44,8 @@ export class PostgresCommentRepository implements ICommentRepository {
                         product_id SERIAL NOT NULL,
                         text TEXT NOT NULL,
                         rate INT NOT NULL,
+                        FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE,
+                        FOREIGN KEY (product_id) REFERENCES phones(id) ON DELETE CASCADE,
                         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                     )`

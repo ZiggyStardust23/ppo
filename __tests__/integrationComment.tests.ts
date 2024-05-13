@@ -14,7 +14,7 @@ describe('Comment Integration Tests', () => {
     test('createComment - создание комментария', async () => {
         await repository.initialize()
         const newComment = new Comment('', '1', '1', 'Отличный товар!', 0);
-        await service.create({userid: "1", productId: "1", text: "Отличный товар!"})
+        await service.create({userid: "1", productId: "1", text: "Отличный товар!"}, "shop_admin")
         .then((createdComment) => {
             if (createdComment instanceof Error){
                 throw(createdComment);
@@ -32,7 +32,7 @@ describe('Comment Integration Tests', () => {
 
     test('getCommentsByProductId - получение комментариев по ID продукта', async () => {
         const productId = '1';
-        await service.findByProductId(productId)
+        await service.findByProductId(productId , "shop_admin")
         .then((comments) => {
             if (comments instanceof Error){
                 throw(comments);
@@ -48,7 +48,7 @@ describe('Comment Integration Tests', () => {
     test('updateComment - обновление комментария', async () => {
         const productId = '1';
         let commentId = "0"; 
-        await service.findByProductId(productId)
+        await service.findByProductId(productId , "shop_admin")
         .then((comments) => {
             if (comments instanceof Error){
                 throw(comments);
@@ -60,7 +60,7 @@ describe('Comment Integration Tests', () => {
             })
 
         const updatedRate = 4;
-        await service.updateRate({id: commentId, rate: updatedRate})
+        await service.updateRate({id: commentId, rate: updatedRate} , "shop_admin")
         .then((updated) => {
             if (updated instanceof Error){
                 throw(updated);
@@ -77,7 +77,7 @@ describe('Comment Integration Tests', () => {
     test('deleteComment - удаление комментария', async () => {
         const productId = '1';
         let commentId = "0"; 
-        await service.findByProductId(productId)
+        await service.findByProductId(productId, "shop_admin")
         .then((comments) => {
             if (comments instanceof Error){
                 throw(comments);
@@ -88,7 +88,7 @@ describe('Comment Integration Tests', () => {
                 expect(false).toBe(true);
             })
 
-        const deleted = await service.delete(commentId);
+        const deleted = await service.delete(commentId, "shop_admin");
         expect(deleted).toBeTruthy();
     });
 });

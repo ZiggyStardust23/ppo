@@ -15,7 +15,7 @@ describe('Basket Service Integration Tests', () => {
     });
 
     test('create - создание корзины', async () => {
-        const newBasket = await basketService.create('2');
+        const newBasket = await basketService.create('2', "shop_admin");
         expect(newBasket).toBeDefined();
         expect(newBasket.userId).toBe('2');
         expect(newBasket.positions).toHaveLength(0);
@@ -23,7 +23,7 @@ describe('Basket Service Integration Tests', () => {
     });
 
     test('findByuserid - получение корзины по userId', async () => {
-        await basketService.findByUserId('2')
+        await basketService.findByUserId('2', "shop_admin")
         .then((fetchedBasket) => {
             if (fetchedBasket instanceof Error){
                 throw(fetchedBasket);
@@ -37,13 +37,13 @@ describe('Basket Service Integration Tests', () => {
     });
 
     test('clear - очистка корзины', async () => {
-        const result = await basketService.clear(testBasketId);
+        const result = await basketService.clear(testBasketId, "shop_admin");
         expect(result).toBeTruthy();
     });
 
     test('addProductsToBasket - добавление товаров в корзину', async () => {
         // Создаем новую корзину без позиций
-        const newBasket = await basketService.create('2');
+        const newBasket = await basketService.create('2', "shop_admin");
         
         // Добавляем товары в корзину
         await basketService.addProductsToBasket({
@@ -52,7 +52,7 @@ describe('Basket Service Integration Tests', () => {
                 {productId: '1', productsAmount: 2 },
                 {productId: '2', productsAmount: 2 },
             ]
-        }).then((updatedBasket) => {
+        }, "shop_admin").then((updatedBasket) => {
             if (updatedBasket instanceof Error){
                 throw(updatedBasket);
                 }
@@ -65,7 +65,7 @@ describe('Basket Service Integration Tests', () => {
                 expect(false).toBe(true);
             })
             // Проверяем, что общая сумма расчитывается корректно
-            await basketService.calculateTotalPrice(newBasket.id)
+            await basketService.calculateTotalPrice(newBasket.id, "shop_admin")
             .then((total) => {
                 if (total instanceof Error){
                     throw(total);
@@ -79,14 +79,14 @@ describe('Basket Service Integration Tests', () => {
 
     test('removeProductsFromBasket - удаление товаров из корзины', async () => {
         // Создаем новую корзину с позициями
-        const newBasket = await basketService.create('2');
+        const newBasket = await basketService.create('2', "shop_admin");
         await basketService.addProductsToBasket({
             id: newBasket.id,
             positions: [
                 {productId: '1', productsAmount: 2 },
                 {productId: '2', productsAmount: 2 },
             ]
-        }).then((total) => {
+        }, "shop_admin").then((total) => {
             if (total instanceof Error){
                 throw(total);
                 }
@@ -101,7 +101,7 @@ describe('Basket Service Integration Tests', () => {
             positions: [
                 {productId: '1', productsAmount: 2 },
             ]
-        }).then((updatedBasket) => {
+        }, "shop_admin").then((updatedBasket) => {
             if (updatedBasket instanceof Error){
                 throw(updatedBasket);
                 }
@@ -114,7 +114,7 @@ describe('Basket Service Integration Tests', () => {
                 expect(false).toBe(true);
             })
         // Проверяем, что общая сумма расчитывается корректно
-        await basketService.calculateTotalPrice(newBasket.id)
+        await basketService.calculateTotalPrice(newBasket.id, "shop_admin")
         .then((total) => {
             if (total instanceof Error){
                 throw(total);

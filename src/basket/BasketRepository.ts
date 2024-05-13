@@ -41,6 +41,7 @@ export class PostgresBasketRepository implements IBasketRepository {
                     `CREATE TABLE baskets (
                         id SERIAL PRIMARY KEY,
                         userid SERIAL NOT NULL,
+                        FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE,
                         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                     )`
                 );
@@ -59,8 +60,8 @@ export class PostgresBasketRepository implements IBasketRepository {
                         basketid SERIAL NOT NULL,
                         phoneid SERIAL NOT NULL,
                         products_amount INT NOT NULL CHECK (products_amount > 0),
-                        FOREIGN KEY (basketid) REFERENCES baskets(id),
-                        FOREIGN KEY (phoneid) REFERENCES phones(id)
+                        FOREIGN KEY (basketid) REFERENCES baskets(id) ON DELETE CASCADE,
+                        FOREIGN KEY (phoneid) REFERENCES phones(id) ON DELETE CASCADE
                     )`
                 );
                 console.log('Таблица позиций корзин создана');

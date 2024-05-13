@@ -20,7 +20,7 @@ describe('User Repository Tests', () => {
     test('createUser - создание пользователя', async () => {
         await userRepository.initialize();
         const newUser = new User('', 'Test User', generateRandomString(15), 'password', '0987654321', userRole.UserRoleSeller);
-        await userService.createUser({email: newUser.email, name: 'Test User', password: 'password', phone_number: '0987654321', role: userRole.UserRoleSeller})
+        await userService.createUser({email: newUser.email, name: 'Test User', password: 'password', phone_number: '0987654321', role: userRole.UserRoleSeller}, "shop_admin")
         .then((createdUser) => {
             if (createdUser instanceof Error){
                 throw(createdUser);
@@ -41,7 +41,7 @@ describe('User Repository Tests', () => {
 
     test('login - авторизация пользователя', async () => {
         const newUser = new User('', 'Test User', testUserEmail, 'password', '0987654321', userRole.UserRoleSeller);
-        await userService.login({email: testUserEmail, password: 'password'})
+        await userService.login({email: testUserEmail, password: 'password'}, "shop_admin")
             .then((createdUser) => {
             if (createdUser instanceof Error){
                 throw(createdUser);
@@ -62,7 +62,7 @@ describe('User Repository Tests', () => {
 
     test('registration - регистрация пользователя', async () => {
         const newUser = new User('', 'Test User', generateRandomString(15), 'password', '0987654321', userRole.UserRoleCustomer);
-        await userService.registration({email: newUser.email, name: 'Test User', password: 'password', phone_number: '0987654321'})
+        await userService.registration({email: newUser.email, name: 'Test User', password: 'password', phone_number: '0987654321'}, "shop_admin")
         .then((createdUser) => {
             if (createdUser instanceof Error){
                 throw(createdUser);
@@ -80,7 +80,7 @@ describe('User Repository Tests', () => {
     });
 
     test('findUserById - получение пользователя по ID', async () => {
-        await userService.findUserById(testuserid)
+        await userService.findUserById(testuserid, "shop_admin")
         .then((fetchedUser) => {
             if (fetchedUser instanceof Error){
                 throw(fetchedUser);
@@ -93,7 +93,7 @@ describe('User Repository Tests', () => {
             })
     });
     test('findUserById - получение пользователя по ID', async () => {
-        await userService.findUserByEmail(testUserEmail)
+        await userService.findUserByEmail(testUserEmail, "shop_admin")
         .then((fetchedUser) => {
             if (fetchedUser instanceof Error){
                 throw(fetchedUser);
@@ -107,7 +107,7 @@ describe('User Repository Tests', () => {
     });
 
     test('updateUser - обновление данных пользователя', async () => {
-        await userService.updateUser({id: testuserid, email: 'updated@example.com', name: 'Updated Name', password: 'password', phone_number: '9876543210', role: userRole.UserRoleAdmin})
+        await userService.updateUser({id: testuserid, email: 'updated@example.com', name: 'Updated Name', password: 'password', phone_number: '9876543210', role: userRole.UserRoleAdmin}, "shop_admin")
         .then((updatedUser) => {
             if (updatedUser instanceof Error){
                 throw(updatedUser);
@@ -126,9 +126,9 @@ describe('User Repository Tests', () => {
 
     //Такого метода в service нет
     test('delete - удаление пользователя', async () => {
-        const deleted = await userRepository.delete(testuserid);
+        const deleted = await userRepository.delete(testuserid, "shop_admin");
         expect(deleted).toBeTruthy();
-        const fetchedUser = await userRepository.getById(testuserid);
+        const fetchedUser = await userRepository.getById(testuserid, "shop_admin");
         expect(fetchedUser).toBeNull();
     });
 });

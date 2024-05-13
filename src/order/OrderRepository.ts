@@ -47,7 +47,7 @@ export class PostgresOrderRepository implements IOrderRepository {
                         date TIMESTAMPTZ NOT NULL,
                         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (userid) REFERENCES users(id)
+                        FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE
                     )`
                 );
                 console.log('Таблица заказов создана');
@@ -66,8 +66,8 @@ export class PostgresOrderRepository implements IOrderRepository {
                         orderid SERIAL NOT NULL,
                         productid SERIAL NOT NULL,
                         products_amount INT NOT NULL CHECK (products_amount > 0),
-                        FOREIGN KEY (orderid) REFERENCES orders(id),
-                        FOREIGN KEY (productid) REFERENCES phones(id)
+                        FOREIGN KEY (orderid) REFERENCES orders(id) ON DELETE CASCADE,
+                        FOREIGN KEY (productid) REFERENCES phones(id) ON DELETE CASCADE
                     )`
                 );
                 console.log('Таблица позиций создана');

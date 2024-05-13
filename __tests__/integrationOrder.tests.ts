@@ -27,7 +27,7 @@ describe('Order Repository Tests', () => {
             userid: '2',
             address: 'some_address_here',
             positions: []
-        }).then((createdOrder) => {
+        }, "shop_admin").then((createdOrder) => {
             if (createdOrder instanceof Error){
                 throw(createdOrder);
                 }
@@ -46,7 +46,7 @@ describe('Order Repository Tests', () => {
     });
 
     test('findOrderById - получение заказа по ID', async () => {
-        await orderService.findById(testOrderId)
+        await orderService.findById(testOrderId, "shop_admin")
         .then((fetchedOrder) => {
             if (fetchedOrder instanceof Error){
                 throw(fetchedOrder);
@@ -60,7 +60,7 @@ describe('Order Repository Tests', () => {
     });
 
     test('findByUserId - получение заказов по ID пользователя', async () => {
-        await orderService.findByUserId('2')
+        await orderService.findByUserId('2', "shop_admin")
         .then((fetchedOrders) => {
             if (fetchedOrders instanceof Error){
                 throw(fetchedOrders);
@@ -78,7 +78,7 @@ describe('Order Repository Tests', () => {
         await orderService.updateOrderStatus({
             id: testOrderId,
             status: OrderStatus.COMPLETED
-        })
+        }, "shop_admin")
         .then((updatedOrder) => {
             if (updatedOrder instanceof Error){
                 throw(updatedOrder);
@@ -102,7 +102,7 @@ describe('Order Repository Tests', () => {
         await orderService.addPositionsToOrder({
             id: testOrderId,
             positions: [{id: " ", orderId: testOrderId, productId: '2', productsAmount: 2}, {id: " ", orderId: testOrderId, productId: '1', productsAmount: 2}]
-        }).then((updatedOrder) => {
+        }, "shop_admin").then((updatedOrder) => {
             if (updatedOrder instanceof Error){
                 throw(updatedOrder);
                 }
@@ -116,7 +116,7 @@ describe('Order Repository Tests', () => {
     test('removePositionsFromOrder - удаление позиций из заказа', async () => {
         await orderService.removePositionsFromOrder({
         id: testOrderId,
-        positions: [{id: posId, orderId: testOrderId, productId: '1', productsAmount: 2}]})
+        positions: [{id: posId, orderId: testOrderId, productId: '1', productsAmount: 2}]}, "shop_admin")
         .then((updatedOrder) => {
             if (updatedOrder instanceof Error){
                 throw(updatedOrder);

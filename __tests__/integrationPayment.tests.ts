@@ -16,7 +16,7 @@ describe('Payment Service Tests', () => {
 
     test('createPayment - создание платежа', async () => {
         await paymentRepository.initialize();
-        await paymentService.create('2')
+        await paymentService.create('2', "shop_admin")
         .then((newPayment) => {
             if (newPayment instanceof Error){
                 throw(newPayment);
@@ -33,7 +33,7 @@ describe('Payment Service Tests', () => {
     });
 
     test('getPaymentById - получение платежа по ID', async () => {
-        await paymentService.findById('2')
+        await paymentService.findById('2', "shop_admin")
         .then((fetchedPayment) => {
             if (fetchedPayment instanceof Error){
                 throw(fetchedPayment);
@@ -52,7 +52,7 @@ describe('Payment Service Tests', () => {
             orderId: '2',
             status: false, // Предположим, что статус платежа был изменен на COMPLETED
             sum: 6000 // Предположим, что сумма платежа увеличилась до 6000
-        }).then((updatedPayment) => {
+        }, "shop_admin").then((updatedPayment) => {
             if (updatedPayment instanceof Error){
                 throw(updatedPayment);
                 }
@@ -68,7 +68,7 @@ describe('Payment Service Tests', () => {
     });
 
     test('getPaymentByOrderId - получение платежа по ID заказа', async () => {
-        await paymentService.findByOrderId('2')
+        await paymentService.findByOrderId('2', "shop_admin")
         .then((paymentByOrderId) => {
             if (paymentByOrderId instanceof Error){
                 throw(paymentByOrderId);

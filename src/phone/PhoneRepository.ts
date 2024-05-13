@@ -410,8 +410,6 @@ export class PostgresPhoneRepository implements IPhoneRepository {
                     phone.dimensionsAndWeight
                 ]
             );
-            
-            console.log(result.rows[0]);
     
             const phoneCreated = new Phone(
                 result.rows[0].id,

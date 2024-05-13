@@ -247,7 +247,7 @@ describe('Phone Repository Tests', () => {
             led_notification_indicator: "Yes",
             additional_features: "Water resistant (up to 30 minutes in a depth of 6 meters), IP68",
             dimensions_and_weight: "146.7 x 71.5 x 7.4 mm (5.78 x 2.81 x 0.29 in), 164 g (5.78 oz)"        
-        }).then((createdPhone) => {
+        }, "shop_admin").then((createdPhone) => {
             if (createdPhone instanceof Error){
                 throw(createdPhone);
                 }
@@ -372,7 +372,7 @@ describe('Phone Repository Tests', () => {
     });
 
     test('findPhoneById - получение телефона по ID', async () => {
-        await phoneService.findById(testPhoneId)
+        await phoneService.findById(testPhoneId, "shop_admin")
             .then((fetchedPhone) => {
             if (fetchedPhone instanceof Error){
                 throw(fetchedPhone);
@@ -502,7 +502,7 @@ describe('Phone Repository Tests', () => {
             led_notification_indicator: "Yes",
             additional_features: "Water resistant (up to 30 minutes in a depth of 6 meters), IP68",
             dimensions_and_weight: "146.7 x 71.5 x 7.4 mm (5.78 x 2.81 x 0.29 in), 164 g (5.78 oz)"        
-    }).then((updatedPhone) => {
+    }, "shop_admin").then((updatedPhone) => {
         if (updatedPhone instanceof Error){
             throw(updatedPhone);
             }
